@@ -13,7 +13,10 @@
 
 	<label>
 		Media Type
-		<select required>
+		<select
+			name="media-type"
+			required
+		>
 			<option> Audio </option>
 			<option> Book </option>
 			<option> TV Show </option>
