@@ -1,5 +1,33 @@
-<h1>Welcome to SvelteKit</h1>
-<p>
-	Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the
-	documentation
-</p>
+<form
+	method="POST"
+	action="?/create"
+>
+	<label>
+		Name
+		<input
+			name="name"
+			autocomplete="off"
+			required
+		/>
+	</label>
+
+	<label>
+		Media Type
+		<select required>
+			<option> Audio </option>
+			<option> Book </option>
+			<option> TV Show </option>
+			<option> Movie </option>
+		</select>
+	</label>
+
+	<button type="submit"> Submit </button>
+</form>
+
+<style>
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+	}
+</style>
