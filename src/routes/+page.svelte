@@ -1,11 +1,16 @@
+<script>
+	import { enhance } from "$app/forms";
+</script>
+
 <form
 	method="POST"
 	action="?/create"
+	use:enhance
 >
 	<label>
-		Name
+		Title
 		<input
-			name="name"
+			name="title"
 			autocomplete="off"
 			required
 		/>
@@ -14,13 +19,13 @@
 	<label>
 		Media Type
 		<select
-			name="media-type"
+			name="media_type"
 			required
 		>
-			<option> Audio </option>
-			<option> Book </option>
-			<option> TV Show </option>
-			<option> Movie </option>
+			<option value="audio"> Audio </option>
+			<option value="book"> Book </option>
+			<option value="tv_show"> TV Show </option>
+			<option value="movie"> Movie </option>
 		</select>
 	</label>
 
