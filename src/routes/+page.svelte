@@ -1,9 +1,11 @@
 <script>
+	import Form from "$lib/components/Form.svelte";
 	const { data } = $props();
 </script>
 
 <div id="banner">Media Tracker</div>
 <div>
+	<Form />
 	{#each data.media as record}
 		<li>{record.title}</li>
 	{/each}
