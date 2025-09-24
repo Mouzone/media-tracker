@@ -4,11 +4,12 @@
 </script>
 
 <div id="banner">Media Tracker</div>
-<div>
+<ul>
+	<li id="create">Add</li>
 	{#each data.media as record}
 		<li>{record.title}</li>
 	{/each}
-</div>
+</ul>
 <Form />
 
 <style>
@@ -17,5 +18,16 @@
 		font-weight: bold;
 		font-size: 8em;
 		padding: 0.4em;
+	}
+
+	ul {
+		display: flex;
+		gap: 1em;
+	}
+
+	li {
+		list-style: none;
+		height: 10em;
+		width: 12em;
 	}
 </style>
