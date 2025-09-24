@@ -1,5 +1,13 @@
+<script>
+	const { data } = $props();
+</script>
+
 <div id="banner">Media Tracker</div>
-<div></div>
+<div>
+	{#each data.media as record}
+		<li>{record.title}</li>
+	{/each}
+</div>
 
 <style>
 	#banner {

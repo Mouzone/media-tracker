@@ -1,6 +1,13 @@
 import { fail } from "@sveltejs/kit";
 import { supabase } from "$lib/supabaseClient.js";
 
+export async function load() {
+	const { data, error } = await supabase.from("media").select();
+	return {
+		media: data ?? [],
+	};
+}
+
 export const actions = {
 	create: async ({ request }) => {
 		const data = await request.formData();
