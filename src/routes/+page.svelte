@@ -5,11 +5,11 @@
 
 <div id="banner">Media Tracker</div>
 <div>
-	<Form />
 	{#each data.media as record}
 		<li>{record.title}</li>
 	{/each}
 </div>
+<Form />
 
 <style>
 	#banner {
