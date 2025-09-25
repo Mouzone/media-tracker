@@ -29,6 +29,16 @@
 		</select>
 	</label>
 
+	<label>
+		Cover Image
+		<input
+			name="cover_image"
+			accept="image"
+			type="file"
+			required
+		/>
+	</label>
+
 	<button type="submit"> Submit </button>
 </form>
 
