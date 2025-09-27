@@ -16,19 +16,17 @@ export const actions = {
 		const media_type = data.get("media_type");
 		const cover_image = data.get("cover_image");
 
-		console.log(cover_image);
 		if (!cover_image) {
 			return;
 		}
 
 		try {
-			const { data: cover_image_url, error } = await supabase.storage
+			await supabase.storage
 				.from("cover_images")
 				.upload(`${title}`, cover_image);
-			console.log(cover_image_url);
 			await supabase
 				.from("media")
-				.insert({ title, media_type, cover_image_url });
+				.insert({ title, media_type, cover_image_url: `${title}` });
 		} catch (error: any) {
 			return fail(422, {
 				title,
