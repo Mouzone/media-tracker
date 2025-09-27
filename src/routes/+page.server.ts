@@ -22,12 +22,13 @@ export const actions = {
 		}
 
 		try {
-			await supabase.from("media").insert({ title, media_type });
-			const { data, error } = await supabase.storage
+			const { data: cover_image_url, error } = await supabase.storage
 				.from("cover_images")
 				.upload(`${title}`, cover_image);
-			console.log(data);
-			console.log(error);
+			console.log(cover_image_url);
+			await supabase
+				.from("media")
+				.insert({ title, media_type, cover_image_url });
 		} catch (error: any) {
 			return fail(422, {
 				title,
