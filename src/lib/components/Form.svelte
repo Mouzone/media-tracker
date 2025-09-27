@@ -5,6 +5,7 @@
 <form
 	method="POST"
 	action="?/create"
+	enctype="multipart/form-data"
 	use:enhance
 >
 	<label>
