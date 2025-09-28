@@ -8,6 +8,10 @@
 	<li id="create">Add</li>
 	{#each data.media as record}
 		<li>{record.title}</li>
+		<img
+			src={record.cover_image_url}
+			alt="missing"
+		/>
 	{/each}
 </ul>
 <Form />

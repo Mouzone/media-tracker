@@ -1,7 +1,7 @@
 import { fail } from "@sveltejs/kit";
 import { supabase } from "$lib/supabaseClient.js";
 import { randomUUID } from "node:crypto";
-
+import path from "node:path";
 export async function load() {
 	const { data, error } = await supabase.from("media").select();
 	return {
@@ -17,18 +17,23 @@ export const actions = {
 		const media_type = data.get("media_type");
 		const cover_image = data.get("cover_image");
 
-		if (!cover_image) {
+		if (!cover_image || !(cover_image instanceof Blob)) {
 			return;
 		}
 
 		try {
 			const uuid = randomUUID();
+			const file_extension = path.extname(cover_image.name);
+			const file_name = `${uuid}${file_extension}`;
+
 			await supabase.storage
 				.from("cover_images")
-				.upload(`${uuid}`, cover_image);
+				.upload(file_name, cover_image);
+
 			const cover_image_url = supabase.storage
 				.from("cover_images")
-				.getPublicUrl(uuid)["data"]["publicUrl"];
+				.getPublicUrl(file_name)["data"]["publicUrl"];
+
 			await supabase
 				.from("media")
 				.insert({ title, media_type, cover_image_url });
