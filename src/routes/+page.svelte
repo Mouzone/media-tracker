@@ -7,11 +7,13 @@
 <ul>
 	<li id="create">Add</li>
 	{#each data.media as record}
-		<li>{record.title}</li>
-		<img
-			src={record.cover_image_url}
-			alt="missing"
-		/>
+		<li>
+			<img
+				src={record.cover_image_url}
+				alt="missing"
+			/>
+			<p>{record.title}</p>
+		</li>
 	{/each}
 </ul>
 <Form />
@@ -33,5 +35,8 @@
 		list-style: none;
 		height: 10em;
 		width: 12em;
+	}
+	img {
+		width: 100%;
 	}
 </style>
