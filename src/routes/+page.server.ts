@@ -28,7 +28,7 @@ export const actions = {
 				.upload(`${uuid}`, cover_image);
 			const cover_image_url = supabase.storage
 				.from("cover_images")
-				.getPublicUrl(uuid);
+				.getPublicUrl(uuid)["data"]["publicUrl"];
 			await supabase
 				.from("media")
 				.insert({ title, media_type, cover_image_url });
