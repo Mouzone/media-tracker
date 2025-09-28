@@ -1,5 +1,6 @@
 import { fail } from "@sveltejs/kit";
 import { supabase } from "$lib/supabaseClient.js";
+import { randomUUID } from "node:crypto";
 
 export async function load() {
 	const { data, error } = await supabase.from("media").select();
@@ -21,12 +22,16 @@ export const actions = {
 		}
 
 		try {
+			const uuid = randomUUID();
 			await supabase.storage
 				.from("cover_images")
-				.upload(`${title}`, cover_image);
+				.upload(`${uuid}`, cover_image);
+			const cover_image_url = supabase.storage
+				.from("cover_images")
+				.getPublicUrl(uuid);
 			await supabase
 				.from("media")
-				.insert({ title, media_type, cover_image_url: `${title}` });
+				.insert({ title, media_type, cover_image_url });
 		} catch (error: any) {
 			return fail(422, {
 				title,
