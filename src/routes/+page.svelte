@@ -51,4 +51,8 @@
 	img {
 		width: 100%;
 	}
+	p {
+		text-align: center;
+		overflow: hidden;
+	}
 </style>
