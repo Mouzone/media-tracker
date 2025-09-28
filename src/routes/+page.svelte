@@ -1,11 +1,20 @@
 <script>
 	import Form from "$lib/components/Form.svelte";
 	const { data } = $props();
+	let showForm = $state(false);
+
+	function toggleForm() {
+		showForm = !showForm;
+	}
 </script>
 
 <div id="banner">Media Tracker</div>
 <ul>
-	<li id="create">Add</li>
+	<button
+		type="button"
+		id="create"
+		onclick={() => toggleForm()}>Add</button
+	>
 	{#each data.media as record}
 		<li>
 			<img
@@ -16,7 +25,10 @@
 		</li>
 	{/each}
 </ul>
-<Form />
+
+{#if showForm}
+	<Form />
+{/if}
 
 <style>
 	#banner {
