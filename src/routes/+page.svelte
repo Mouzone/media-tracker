@@ -1,12 +1,18 @@
-<script>
+<script lang="ts">
+	import type {
+		SelectedRecordOptions,
+		MediaPageData,
+		Record,
+	} from "$lib/types";
 	import Form from "$lib/components/Form.svelte";
-	const { data } = $props();
+	const { data } = $props<{ data: MediaPageData }>();
+	const records: Record[] = data.media;
 
-	let selectedRecord = $state(null);
+	let selectedRecord = $state<SelectedRecordOptions>(null);
 	let isFormVisible = $derived(selectedRecord !== null);
 
-	function selectRecord(recordId) {
-		selectedRecord = data.media.find((r) => r.id === recordId);
+	function selectRecord(recordId: Record["id"]) {
+		selectedRecord = records.find((r) => r.id === recordId);
 	}
 
 	function create() {
@@ -25,7 +31,7 @@
 		id="create"
 		onclick={() => create()}>Add</button
 	>
-	{#each data.media as record (record.id)}
+	{#each records as record (record.id)}
 		<li>
 			<button onclick={() => selectRecord(record.id)}>
 				<img
