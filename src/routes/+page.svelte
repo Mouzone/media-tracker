@@ -1,10 +1,20 @@
 <script>
 	import Form from "$lib/components/Form.svelte";
 	const { data } = $props();
-	let showForm = $state(false);
 
-	function toggleForm() {
-		showForm = !showForm;
+	let selectedRecord = $state(null);
+	let isFormVisible = $derived(selectedRecord !== null);
+
+	function selectRecord(recordId) {
+		selectedRecord = data.media.find((r) => r.id === recordId);
+	}
+
+	function create() {
+		selectedRecord = {};
+	}
+
+	function closeForm() {
+		selectedRecord = null;
 	}
 </script>
 
@@ -13,21 +23,26 @@
 	<button
 		type="button"
 		id="create"
-		onclick={() => toggleForm()}>Add</button
+		onclick={() => create()}>Add</button
 	>
-	{#each data.media as record}
+	{#each data.media as record (record.id)}
 		<li>
-			<img
-				src={record.cover_image_url}
-				alt="missing"
-			/>
-			<p>{record.title}</p>
+			<button onclick={() => selectRecord(record.id)}>
+				<img
+					src={record.cover_image_url}
+					alt="missing"
+				/>
+				<p>{record.title}</p>
+			</button>
 		</li>
 	{/each}
 </ul>
 
-{#if showForm}
-	<Form />
+{#if isFormVisible}
+	<Form
+		record={selectedRecord}
+		onClose={closeForm}
+	/>
 {/if}
 
 <style>
