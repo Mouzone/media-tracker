@@ -12,7 +12,7 @@
 	let isFormVisible = $derived(selectedRecord !== null);
 
 	function selectRecord(recordId: Record["id"]) {
-		selectedRecord = records.find((r) => r.id === recordId);
+		selectedRecord = records.find((r) => r.id === recordId)!;
 	}
 
 	function create() {
