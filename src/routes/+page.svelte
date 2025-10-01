@@ -61,6 +61,12 @@
 	}
 
 	ul {
-		display: flex;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+		grid-template-rows: masonry;
+		gap: 0;
+
+		padding: 0;
+		justify-items: center;
 	}
 </style>
