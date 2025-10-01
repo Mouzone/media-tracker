@@ -5,6 +5,8 @@
 		Record,
 	} from "$lib/types";
 	import Form from "$lib/components/Form.svelte";
+	import RecordThumbnail from "$lib/components/RecordThumbnail.svelte";
+
 	const { data } = $props<{ data: MediaPageData }>();
 	const records: Record[] = data.media;
 
@@ -32,15 +34,10 @@
 		onclick={() => create()}>Add</button
 	>
 	{#each records as record (record.id)}
-		<li>
-			<button onclick={() => selectRecord(record.id)}>
-				<img
-					src={record.cover_image_url}
-					alt="missing"
-				/>
-				<p>{record.title}</p>
-			</button>
-		</li>
+		<RecordThumbnail
+			{record}
+			{selectRecord}
+		/>
 	{/each}
 </ul>
 
@@ -62,18 +59,5 @@
 	ul {
 		display: flex;
 		gap: 1em;
-	}
-
-	li {
-		list-style: none;
-		height: 10em;
-		width: 12em;
-	}
-	img {
-		width: 100%;
-	}
-	p {
-		text-align: center;
-		overflow: hidden;
 	}
 </style>
