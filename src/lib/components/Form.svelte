@@ -66,4 +66,7 @@
 		flex-direction: column;
 		gap: 1em;
 	}
+	img {
+		width: 20em;
+	}
 </style>
