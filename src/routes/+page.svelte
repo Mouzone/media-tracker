@@ -66,7 +66,7 @@
 		grid-template-rows: masonry;
 		gap: 0;
 
-		padding: 0;
+		padding: 1em;
 		justify-items: center;
 	}
 </style>

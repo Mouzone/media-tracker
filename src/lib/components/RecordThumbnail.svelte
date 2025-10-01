@@ -34,7 +34,7 @@
 	}
 	img {
 		display: block;
-		width: 20em;
+		width: 100%;
 		height: auto;
 	}
 
