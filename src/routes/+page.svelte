@@ -26,13 +26,17 @@
 	}
 </script>
 
-<div id="banner">Media Tracker</div>
-<ul>
+<div id="banner">
+	Media Tracker
 	<button
 		type="button"
 		id="create"
-		onclick={() => create()}>Add</button
+		onclick={() => create()}
 	>
+		Add
+	</button>
+</div>
+<ul>
 	{#each records as record (record.id)}
 		<RecordThumbnail
 			{record}
@@ -52,7 +56,7 @@
 	#banner {
 		background-color: chartreuse;
 		font-weight: bold;
-		font-size: 8em;
+		font-size: 6em;
 		padding: 0.4em;
 	}
 
