@@ -47,7 +47,7 @@
 		overflow: hidden;
 		background-color: black;
 		color: white;
-		opacity: 60%;
+		opacity: 80%;
 		padding: 10px;
 		box-sizing: border-box;
 
