@@ -22,6 +22,7 @@
 	li {
 		list-style: none;
 		display: flex;
+		padding: 0;
 	}
 	button {
 		background-color: white;
@@ -29,6 +30,7 @@
 		position: relative;
 		display: inline-block;
 		line-height: 0;
+		padding: 0;
 
 		overflow: hidden;
 	}
@@ -54,7 +56,7 @@
 
 		transform: translateY(100%);
 
-		transition: transform 0.3s ease-out;
+		transition: transform 0.3s ease-in-out;
 	}
 
 	p.show {
