@@ -10,10 +10,12 @@
 	enctype="multipart/form-data"
 	use:enhance
 >
-	<img
-		src={cover_image_url}
-		alt="missing"
-	/>
+	{#if cover_image_url}
+		<img
+			src={cover_image_url}
+			alt="missing"
+		/>
+	{/if}
 
 	<label>
 		Title
