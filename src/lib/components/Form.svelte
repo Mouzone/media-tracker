@@ -49,7 +49,7 @@
 		/>
 	</label>
 
-	<div>
+	<div id="buttons">
 		<button
 			type="button"
 			onclick={() => onClose()}
@@ -65,8 +65,14 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
+
+		align-items: center;
 	}
 	img {
 		width: 20em;
+	}
+	div#buttons {
+		display: flex;
+		gap: 1em;
 	}
 </style>
