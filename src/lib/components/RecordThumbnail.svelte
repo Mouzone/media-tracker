@@ -1,14 +1,20 @@
 <script>
 	const { record, selectRecord } = $props();
+
+	let isHovering = $state(false);
 </script>
 
 <li>
-	<button onclick={() => selectRecord(record.id)}>
+	<button
+		onclick={() => selectRecord(record.id)}
+		onmouseenter={() => (isHovering = true)}
+		onmouseleave={() => (isHovering = false)}
+	>
 		<img
 			src={record.cover_image_url}
 			alt="missing"
 		/>
-		<p>{record.title}</p>
+		<p class={{ show: isHovering }}>{record.title}</p>
 	</button>
 </li>
 
@@ -22,6 +28,8 @@
 		position: relative;
 		display: inline-block;
 		line-height: 0;
+
+		overflow: hidden;
 	}
 	img {
 		display: block;
@@ -31,7 +39,7 @@
 
 	p {
 		position: absolute;
-		bottom: 0;
+		bottom: -15px;
 		left: 0;
 		width: 100%;
 
@@ -42,5 +50,13 @@
 		opacity: 60%;
 		padding: 10px;
 		box-sizing: border-box;
+
+		transform: translateY(100%);
+
+		transition: transform 0.3s ease-out;
+	}
+
+	p.show {
+		transform: translateY(0);
 	}
 </style>
