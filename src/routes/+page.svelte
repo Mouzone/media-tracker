@@ -58,6 +58,5 @@
 
 	ul {
 		display: flex;
-		gap: 1em;
 	}
 </style>

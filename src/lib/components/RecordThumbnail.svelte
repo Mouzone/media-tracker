@@ -33,7 +33,7 @@
 	}
 	img {
 		display: block;
-		width: 100%;
+		width: 20em;
 		height: auto;
 	}
 
