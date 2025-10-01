@@ -43,14 +43,13 @@
 			{selectRecord}
 		/>
 	{/each}
+	{#if isFormVisible}
+		<Form
+			record={selectedRecord}
+			onClose={closeForm}
+		/>
+	{/if}
 </ul>
-
-{#if isFormVisible}
-	<Form
-		record={selectedRecord}
-		onClose={closeForm}
-	/>
-{/if}
 
 <style>
 	#banner {

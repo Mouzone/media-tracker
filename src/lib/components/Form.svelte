@@ -62,9 +62,15 @@
 
 <style>
 	form {
+		position: absolute;
 		display: flex;
 		flex-direction: column;
 		gap: 1em;
+		background-color: antiquewhite;
+		border: 3px solid black;
+		border-radius: 20px;
+		width: min(30em, 80%);
+		padding: 20px;
 
 		align-items: center;
 	}
