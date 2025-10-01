@@ -2,6 +2,7 @@ import { fail } from "@sveltejs/kit";
 import { supabase } from "$lib/supabaseClient.js";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+
 export async function load() {
 	const { data, error } = await supabase.from("media").select();
 	return {
