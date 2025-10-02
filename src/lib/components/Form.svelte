@@ -1,6 +1,6 @@
 <script>
 	import { enhance } from "$app/forms";
-	let { record, onClose } = $props();
+	let { record, onClose, onSuccess } = $props();
 	const { title = "", media_type = "audio", cover_image_url = "" } = record;
 </script>
 
@@ -8,7 +8,15 @@
 	method="POST"
 	action="?/create"
 	enctype="multipart/form-data"
-	use:enhance
+	use:enhance={() => {
+		return async ({ result, update }) => {
+			if (result.type === "success" && result.data?.record) {
+				onSuccess(result.data.record);
+			} else {
+				await update();
+			}
+		};
+	}}
 >
 	{#if cover_image_url}
 		<img

@@ -35,9 +35,17 @@ export const actions = {
 				.from("cover_images")
 				.getPublicUrl(file_name)["data"]["publicUrl"];
 
-			await supabase
+			const { data: new_record, error: insertError } = await supabase
 				.from("media")
-				.insert({ title, media_type, cover_image_url });
+				.insert({ title, media_type, cover_image_url })
+				.select()
+				.single();
+
+			if (insertError) {
+				throw new Error(insertError.message);
+			}
+
+			return { success: true, record: new_record };
 		} catch (error: any) {
 			return fail(422, {
 				title,

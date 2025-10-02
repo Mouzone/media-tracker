@@ -8,7 +8,7 @@
 	import RecordThumbnail from "$lib/components/RecordThumbnail.svelte";
 
 	const { data } = $props<{ data: MediaPageData }>();
-	const records: Record[] = data.media;
+	let records: Record[] = $state(data.media);
 
 	let selectedRecord = $state<SelectedRecordOptions>(null);
 	let isFormVisible = $derived(selectedRecord !== null);
@@ -23,6 +23,10 @@
 
 	function closeForm() {
 		selectedRecord = null;
+	}
+	function handleFormSuccess(newRecord: Record) {
+		records = [...records, newRecord];
+		closeForm();
 	}
 </script>
 
@@ -47,6 +51,7 @@
 		<Form
 			record={selectedRecord}
 			onClose={closeForm}
+			onSuccess={handleFormSuccess}
 		/>
 	{/if}
 </ul>
