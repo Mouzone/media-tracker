@@ -1,7 +1,13 @@
 <script>
 	import { enhance } from "$app/forms";
 	let { record, onClose, onSuccess } = $props();
-	const { title = "", media_type = "audio", cover_image_url = "" } = record;
+	const {
+		id = "",
+		title = "",
+		media_type = "audio",
+		cover_image_url = "",
+	} = record;
+	let isEdit = cover_image_url !== "";
 </script>
 
 <form
@@ -24,7 +30,13 @@
 			alt="missing"
 		/>
 	{/if}
-
+	{#if isEdit}
+		<input
+			type="hidden"
+			name="id"
+			value={id}
+		/>
+	{/if}
 	<label>
 		Title
 		<input
@@ -60,6 +72,9 @@
 	</label>
 
 	<div id="buttons">
+		{#if isEdit}
+			<button formaction="?/delete"> Delete </button>
+		{/if}
 		<button
 			type="button"
 			onclick={() => onClose()}
