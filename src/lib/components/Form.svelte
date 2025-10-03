@@ -71,6 +71,7 @@
 			name="cover_image"
 			accept="image"
 			type="file"
+			required={!isEdit}
 		/>
 	</label>
 
