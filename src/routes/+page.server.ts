@@ -56,15 +56,20 @@ export const actions = {
 	delete: async ({ request }) => {
 		const data = await request.formData();
 		const id = await data.get("id");
-		const { data: recordToRemove, error: deleteError } = await supabase
-			.from("media")
-			.delete()
-			.eq("id", id);
 
-		if (deleteError) {
-			throw new Error(deleteError.message);
+		try {
+			const { data: recordToRemove, error: deleteError } = await supabase
+				.from("media")
+				.delete()
+				.eq("id", id);
+
+			if (deleteError) {
+				throw new Error(deleteError.message);
+			}
+
+			return { success: true, deleteId: Number(id) };
+		} catch (error: any) {
+			return fail(500, { error: error.message });
 		}
-
-		return { success: true, id };
 	},
 };

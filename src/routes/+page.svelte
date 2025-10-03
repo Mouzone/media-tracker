@@ -28,6 +28,11 @@
 		records = [...records, newRecord];
 		closeForm();
 	}
+
+	function handleFormDelete(deleteId: number) {
+		records = records.filter((r) => r.id !== deleteId);
+		closeForm();
+	}
 </script>
 
 <div id="banner">
@@ -53,6 +58,7 @@
 			record={selectedRecord}
 			onClose={closeForm}
 			onSuccess={handleFormSuccess}
+			onDelete={handleFormDelete}
 		/>
 	{/if}
 </ul>

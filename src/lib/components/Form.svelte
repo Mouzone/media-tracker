@@ -1,6 +1,6 @@
 <script>
 	import { enhance } from "$app/forms";
-	let { record, onClose, onSuccess } = $props();
+	let { record, onClose, onSuccess, onDelete } = $props();
 	const {
 		id = "",
 		title = "",
@@ -16,8 +16,12 @@
 	enctype="multipart/form-data"
 	use:enhance={() => {
 		return async ({ result, update }) => {
-			if (result.type === "success" && result.data?.record) {
-				onSuccess(result.data.record);
+			if (result.type === "success") {
+				if (result.data?.record) {
+					onSuccess(result.data.record);
+				} else if (result.data?.deleteId) {
+					onDelete(result.data.deleteId);
+				}
 			} else {
 				await update();
 			}
@@ -67,7 +71,6 @@
 			name="cover_image"
 			accept="image"
 			type="file"
-			required
 		/>
 	</label>
 
