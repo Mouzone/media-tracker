@@ -84,7 +84,7 @@
 		>
 			Exit</button
 		>
-		<button type="submit"> Submit </button>
+		<button type="submit"> {isEdit ? "Update" : "Submit"} </button>
 	</div>
 </form>
 
