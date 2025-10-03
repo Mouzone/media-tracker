@@ -40,6 +40,7 @@
 		Add
 	</button>
 </div>
+<hr />
 <ul>
 	{#each records as record (record.id)}
 		<RecordThumbnail
@@ -58,10 +59,10 @@
 
 <style>
 	#banner {
-		background-color: chartreuse;
 		font-weight: bold;
 		font-size: 6em;
-		padding: 0.4em;
+		padding: 0;
+		margin: 0;
 	}
 
 	ul {
