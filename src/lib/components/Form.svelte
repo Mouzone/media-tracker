@@ -85,7 +85,11 @@
 		>
 			Exit</button
 		>
-		<button type="submit"> {isEdit ? "Update" : "Submit"} </button>
+		{#if isEdit}
+			<button formaction="?/update"> Update </button>
+		{:else}
+			<button type="submit"> Submit </button>
+		{/if}
 	</div>
 </form>
 
