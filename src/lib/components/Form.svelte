@@ -40,6 +40,11 @@
 			name="id"
 			value={id}
 		/>
+		<input
+			type="hidden"
+			name="cover_image_url"
+			value={cover_image_url}
+		/>
 	{/if}
 	<label>
 		Title
