@@ -22,7 +22,7 @@ export const actions = {
 		}
 
 		try {
-			const cover_image_url = uploadImage(cover_image);
+			const cover_image_url = await uploadImage(cover_image);
 			const { data: new_record, error: insertError } = await supabase
 				.from("media")
 				.insert({ title, media_type, cover_image_url })
@@ -85,7 +85,7 @@ export const actions = {
 			await supabase.storage
 				.from("cover_images")
 				.remove([cover_image_url]);
-			const new_cover_image_url = uploadImage(cover_image);
+			const new_cover_image_url = await uploadImage(cover_image);
 		}
 
 		// remember to delete the old cover_image from the bucket
