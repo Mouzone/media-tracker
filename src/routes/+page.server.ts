@@ -1,7 +1,6 @@
 import { fail } from "@sveltejs/kit";
 import { supabase } from "$lib/supabaseClient.js";
-import { randomUUID } from "node:crypto";
-import path from "node:path";
+import uploadImage from "$lib/helper functions/uploadImage.js";
 
 export async function load() {
 	const { data, error } = await supabase.from("media").select();
@@ -23,18 +22,7 @@ export const actions = {
 		}
 
 		try {
-			const uuid = randomUUID();
-			const file_extension = path.extname(cover_image.name);
-			const file_name = `${uuid}${file_extension}`;
-
-			await supabase.storage
-				.from("cover_images")
-				.upload(file_name, cover_image);
-
-			const cover_image_url = supabase.storage
-				.from("cover_images")
-				.getPublicUrl(file_name)["data"]["publicUrl"];
-
+			const cover_image_url = uploadImage(cover_image);
 			const { data: new_record, error: insertError } = await supabase
 				.from("media")
 				.insert({ title, media_type, cover_image_url })
@@ -55,7 +43,7 @@ export const actions = {
 	},
 	delete: async ({ request }) => {
 		const data = await request.formData();
-		const id = await data.get("id");
+		const id = data.get("id");
 
 		try {
 			const { data: recordToRemove, error: deleteError } = await supabase
@@ -71,5 +59,18 @@ export const actions = {
 		} catch (error: any) {
 			return fail(500, { error: error.message });
 		}
+	},
+	update: async ({ request }) => {
+		const data = await request.formData();
+		const id = data.get("id");
+		const title = data.get("title");
+		const media_type = data.get("media_type");
+		const cover_image = data.get("cover_image");
+
+		if (!cover_image || !(cover_image instanceof Blob)) {
+			return;
+		}
+
+		const cover_image_url = uploadImage(cover_image);
 	},
 };
