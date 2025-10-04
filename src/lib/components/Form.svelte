@@ -46,55 +46,57 @@
 			value={cover_image_url}
 		/>
 	{/if}
-	<label>
-		Title
-		<input
-			name="title"
-			autocomplete="off"
-			value={title}
-			required
-		/>
-	</label>
+	<div id="form-inputs">
+		<label>
+			Title
+			<input
+				name="title"
+				autocomplete="off"
+				value={title}
+				required
+			/>
+		</label>
 
-	<label>
-		Media Type
-		<select
-			name="media_type"
-			value={media_type}
-			required
-		>
-			<option value="audio"> Audio </option>
-			<option value="book"> Book </option>
-			<option value="tv_show"> TV Show </option>
-			<option value="movie"> Movie </option>
-		</select>
-	</label>
+		<label>
+			Media Type
+			<select
+				name="media_type"
+				value={media_type}
+				required
+			>
+				<option value="audio"> Audio </option>
+				<option value="book"> Book </option>
+				<option value="tv_show"> TV Show </option>
+				<option value="movie"> Movie </option>
+			</select>
+		</label>
 
-	<label>
-		Cover Image
-		<input
-			name="cover_image"
-			accept="image"
-			type="file"
-			required={!isEdit}
-		/>
-	</label>
+		<label>
+			Cover Image
+			<input
+				name="cover_image"
+				accept="image"
+				type="file"
+				required={!isEdit}
+			/>
+		</label>
 
-	<div id="buttons">
-		{#if isEdit}
-			<button formaction="?/delete"> Delete </button>
-		{/if}
-		<button
-			type="button"
-			onclick={() => onClose()}
-		>
-			Exit</button
-		>
-		{#if isEdit}
-			<button formaction="?/update"> Update </button>
-		{:else}
-			<button type="submit"> Submit </button>
-		{/if}
+		<div id="buttons">
+			{#if isEdit}
+				<button formaction="?/delete"> Delete </button>
+			{/if}
+			<button
+				type="button"
+				onclick={() => onClose()}
+			>
+				Exit</button
+			>
+			{#if isEdit}
+				<button formaction="?/update"> Update </button>
+			{:else}
+				<button type="submit"> Submit </button>
+			{/if}
+		</div>
 	</div>
 </form>
 
@@ -102,18 +104,21 @@
 	form {
 		position: absolute;
 		display: flex;
-		flex-direction: column;
 		gap: 1em;
-		background-color: antiquewhite;
+		background-color: white;
 		border: 3px solid black;
 		border-radius: 20px;
-		width: min(30em, 80%);
 		padding: 20px;
 
 		align-items: center;
 	}
 	img {
 		width: 20em;
+	}
+	div#form-inputs {
+		display: flex;
+		flex-direction: column;
+		gap: 2em;
 	}
 	div#buttons {
 		display: flex;
