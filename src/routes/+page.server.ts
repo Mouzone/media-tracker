@@ -85,7 +85,7 @@ export const actions = {
 			await supabase.storage
 				.from("cover_images")
 				.remove([cover_image_url]);
-			const new_cover_image_url = await uploadImage(cover_image);
+			new_cover_image_url = await uploadImage(cover_image);
 		}
 
 		// remember to delete the old cover_image from the bucket
