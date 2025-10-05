@@ -74,6 +74,7 @@ export const actions = {
 		const media_type = data.get("media_type");
 		// new cover image the user wants
 		const cover_image = data.get("cover_image");
+		console.log(cover_image);
 		// old url of what is currently rendered
 		const cover_image_url = String(data.get("cover_image_url"));
 
@@ -81,7 +82,11 @@ export const actions = {
 			return;
 		}
 		let new_cover_image_url = cover_image_url;
-		if (cover_image && cover_image instanceof Blob) {
+		if (
+			cover_image &&
+			cover_image instanceof File &&
+			cover_image.size !== 0
+		) {
 			await supabase.storage
 				.from("cover_images")
 				.remove([cover_image_url]);
