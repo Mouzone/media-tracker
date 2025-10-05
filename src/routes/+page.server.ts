@@ -74,7 +74,6 @@ export const actions = {
 		const media_type = data.get("media_type");
 		// new cover image the user wants
 		const cover_image = data.get("cover_image");
-		console.log(cover_image);
 		// old url of what is currently rendered
 		const cover_image_url = String(data.get("cover_image_url"));
 
@@ -102,7 +101,6 @@ export const actions = {
 			.select()
 			.single();
 
-		console.log(updateData);
 		return { success: 200, updateId: id, updateData };
 	},
 };
