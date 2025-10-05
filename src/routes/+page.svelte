@@ -33,6 +33,16 @@
 		records = records.filter((r) => r.id !== deleteId);
 		closeForm();
 	}
+
+	function handleFormUpdate(updateId: number, updateData: Record) {
+		records = records.map((r) => {
+			if (r.id === updateId) {
+				return updateData;
+			}
+			return r;
+		});
+		closeForm();
+	}
 </script>
 
 <div id="banner">
@@ -59,6 +69,7 @@
 			onClose={closeForm}
 			onSuccess={handleFormSuccess}
 			onDelete={handleFormDelete}
+			onUpdate={handleFormUpdate}
 		/>
 	{/if}
 </ul>

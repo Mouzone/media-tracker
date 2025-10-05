@@ -90,10 +90,14 @@ export const actions = {
 
 		// remember to delete the old cover_image from the bucket
 
-		const { data: recordToUpdate, error } = await supabase
+		const { data: updateData, error } = await supabase
 			.from("media")
 			.update({ title, media_type, cover_image_url: new_cover_image_url })
 			.eq("id", id)
-			.select();
+			.select()
+			.single();
+
+		console.log(updateData);
+		return { success: 200, updateId: id, updateData };
 	},
 };

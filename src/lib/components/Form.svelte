@@ -1,6 +1,6 @@
 <script>
 	import { enhance } from "$app/forms";
-	let { record, onClose, onSuccess, onDelete } = $props();
+	let { record, onClose, onSuccess, onDelete, onUpdate } = $props();
 	const {
 		id = "",
 		title = "",
@@ -21,6 +21,8 @@
 					onSuccess(result.data.record);
 				} else if (result.data?.deleteId) {
 					onDelete(result.data.deleteId);
+				} else if (result.data?.updateId) {
+					onUpdate(result.data.updateId, result.data.updateData);
 				}
 			} else {
 				await update();
