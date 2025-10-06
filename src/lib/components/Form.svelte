@@ -104,13 +104,13 @@
 
 <style>
 	form {
-		position: absolute;
+		position: fixed;
 		display: flex;
 		gap: 1em;
 		background-color: white;
-		border: 3px solid black;
-		border-radius: 20px;
+		box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
 		padding: 20px;
+		border-radius: 10px;
 
 		align-items: center;
 	}
