@@ -6,6 +6,7 @@
 	} from "$lib/types";
 	import Form from "$lib/components/Form.svelte";
 	import RecordThumbnail from "$lib/components/RecordThumbnail.svelte";
+	import AddButton from "$lib/components/AddButton.svelte";
 
 	const { data } = $props<{ data: MediaPageData }>();
 	let records: Record[] = $state(data.media);
@@ -45,16 +46,7 @@
 	}
 </script>
 
-<div id="banner">
-	Media Tracker
-	<button
-		type="button"
-		id="create"
-		onclick={() => create()}
-	>
-		Add
-	</button>
-</div>
+<div id="banner">Media Tracker</div>
 <hr />
 <ul>
 	{#each records as record (record.id)}
@@ -72,6 +64,7 @@
 			onUpdate={handleFormUpdate}
 		/>
 	{/if}
+	<AddButton {create} />
 </ul>
 
 <style>
