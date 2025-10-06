@@ -39,6 +39,8 @@
 
 		text-align: center;
 		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 		background-color: black;
 		color: white;
 		opacity: 80%;
