@@ -69,7 +69,7 @@ export const actions = {
 	},
 	update: async ({ request }) => {
 		const data = await request.formData();
-		const id = data.get("id");
+		const id = Number(data.get("id"));
 		const title = data.get("title");
 		const media_type = data.get("media_type");
 		// new cover image the user wants
@@ -101,6 +101,6 @@ export const actions = {
 			.select()
 			.single();
 
-		return { success: 200, updateId: id, updateData };
+		return { success: true, updateId: id, updateData };
 	},
 };
