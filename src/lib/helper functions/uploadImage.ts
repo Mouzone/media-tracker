@@ -8,8 +8,5 @@ export default async function createImage(cover_image: File) {
 	const file_name = `${uuid}${file_extension}`;
 
 	await supabase.storage.from("cover_images").upload(file_name, cover_image);
-
-	return supabase.storage.from("cover_images").getPublicUrl(file_name)[
-		"data"
-	]["publicUrl"];
+	return file_name;
 }

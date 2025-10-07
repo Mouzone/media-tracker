@@ -22,10 +22,10 @@ export const actions = {
 		}
 
 		try {
-			const cover_image_url = await uploadImage(cover_image);
+			const cover_image_file = await uploadImage(cover_image);
 			const { data: new_record, error: insertError } = await supabase
 				.from("media")
-				.insert({ title, media_type, cover_image_url })
+				.insert({ title, media_type, cover_image_file })
 				.select()
 				.single();
 
@@ -44,14 +44,14 @@ export const actions = {
 	delete: async ({ request }) => {
 		const data = await request.formData();
 		const id = data.get("id");
-		const cover_image_url = String(data.get("cover_image_url"));
+		const cover_image_file = String(data.get("cover_image_file"));
 		try {
-			if (!cover_image_url) {
+			if (!cover_image_file) {
 				return;
 			}
 			await supabase.storage
 				.from("cover_images")
-				.remove([cover_image_url]);
+				.remove([cover_image_file]);
 			const { data: recordToRemove, error: deleteError } = await supabase
 				.from("media")
 				.delete()
@@ -75,12 +75,12 @@ export const actions = {
 		// new cover image the user wants
 		const cover_image = data.get("cover_image");
 		// old url of what is currently rendered
-		const cover_image_url = String(data.get("cover_image_url"));
+		const cover_image_file = String(data.get("cover_image_file"));
 
-		if (!cover_image_url) {
+		if (!cover_image_file) {
 			return;
 		}
-		let new_cover_image_url = cover_image_url;
+		let new_cover_image_file = cover_image_file;
 		if (
 			cover_image &&
 			cover_image instanceof File &&
@@ -88,15 +88,19 @@ export const actions = {
 		) {
 			await supabase.storage
 				.from("cover_images")
-				.remove([cover_image_url]);
-			new_cover_image_url = await uploadImage(cover_image);
+				.remove([cover_image_file]);
+			new_cover_image_file = await uploadImage(cover_image);
 		}
 
 		// remember to delete the old cover_image from the bucket
 
 		const { data: updateData, error } = await supabase
 			.from("media")
-			.update({ title, media_type, cover_image_url: new_cover_image_url })
+			.update({
+				title,
+				media_type,
+				cover_image_file: new_cover_image_file,
+			})
 			.eq("id", id)
 			.select()
 			.single();

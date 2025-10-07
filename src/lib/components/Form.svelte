@@ -5,9 +5,9 @@
 		id = "",
 		title = "",
 		media_type = "audio",
-		cover_image_url = "",
+		cover_image_file = "",
 	} = record;
-	let isEdit = cover_image_url !== "";
+	let isEdit = cover_image_file !== "";
 </script>
 
 <form
@@ -30,9 +30,9 @@
 		};
 	}}
 >
-	{#if cover_image_url}
+	{#if cover_image_file}
 		<img
-			src={cover_image_url}
+			src={cover_image_file}
 			alt="missing"
 		/>
 	{/if}
@@ -44,8 +44,8 @@
 		/>
 		<input
 			type="hidden"
-			name="cover_image_url"
-			value={cover_image_url}
+			name="cover_image_file"
+			value={cover_image_file}
 		/>
 	{/if}
 	<div id="form-inputs">
