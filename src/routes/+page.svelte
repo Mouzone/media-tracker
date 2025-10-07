@@ -68,7 +68,7 @@
 <style>
 	ul {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 		grid-template-rows: auto;
 		gap: 0;
 
