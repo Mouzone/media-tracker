@@ -9,7 +9,9 @@ export async function load() {
 		data = data.map((record) => {
 			const publicUrl = supabase.storage
 				.from("cover_images")
-				.getPublicUrl(record.cover_image_file).data.publicUrl;
+				.getPublicUrl(record.cover_image_file, {
+					transform: { width: 600, height: 800 },
+				}).data.publicUrl;
 			return {
 				...record,
 				publicUrl,
