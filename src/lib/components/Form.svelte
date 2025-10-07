@@ -32,7 +32,7 @@
 >
 	{#if cover_image_file}
 		<img
-			src={cover_image_file}
+			src={record.publicUrl}
 			alt="missing"
 		/>
 	{/if}
