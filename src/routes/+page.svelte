@@ -46,8 +46,6 @@
 	}
 </script>
 
-<div id="banner">Media Tracker</div>
-<hr />
 <ul>
 	{#each records as record (record.id)}
 		<RecordThumbnail
@@ -68,13 +66,6 @@
 </ul>
 
 <style>
-	#banner {
-		font-weight: bold;
-		font-size: 6em;
-		padding: 0;
-		margin: 0;
-	}
-
 	ul {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(16em, 1fr));
