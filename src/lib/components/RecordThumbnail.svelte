@@ -32,7 +32,6 @@
 	p {
 		position: absolute;
 		bottom: 0;
-		left: 0;
 		width: 100%;
 
 		text-align: center;
@@ -41,7 +40,7 @@
 		text-overflow: ellipsis;
 		background-color: black;
 		color: white;
-		opacity: 80%;
+		opacity: 0%;
 		padding: 10px;
 		box-sizing: border-box;
 
@@ -51,6 +50,7 @@
 	}
 
 	button:hover p {
+		opacity: 80%;
 		transform: translateY(0);
 	}
 </style>
