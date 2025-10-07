@@ -3,7 +3,19 @@ import { supabase } from "$lib/supabaseClient.js";
 import uploadImage from "$lib/helper functions/uploadImage.js";
 
 export async function load() {
-	const { data, error } = await supabase.from("media").select();
+	let { data, error } = await supabase.from("media").select();
+	console.log(data);
+	if (data) {
+		data = data.map((record) => {
+			const publicUrl = supabase.storage
+				.from("cover_images")
+				.getPublicUrl(record.cover_image_file).data.publicUrl;
+			return {
+				...record,
+				publicUrl,
+			};
+		});
+	}
 	return {
 		media: data ?? [],
 	};

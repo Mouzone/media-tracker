@@ -2,7 +2,7 @@ export interface Record {
 	id: number;
 	title: string;
 	media_type: "audio" | "movie" | "tv_show" | "book";
-	cover_image_url: string;
+	cover_image_file: string;
 	created_at: string;
 }
 

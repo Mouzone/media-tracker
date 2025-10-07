@@ -5,7 +5,7 @@
 <li>
 	<button onclick={() => selectRecord(record.id)}>
 		<img
-			src={record.cover_image_url}
+			src={record.publicUrl}
 			alt="missing"
 		/>
 		<p>{record.title}</p>
