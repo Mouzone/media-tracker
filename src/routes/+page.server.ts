@@ -10,7 +10,7 @@ export async function load() {
 			const publicUrl = supabase.storage
 				.from("cover_images")
 				.getPublicUrl(record.cover_image_file, {
-					transform: { width: 600, height: 800 },
+					transform: { width: 300, height: 500, resize: "cover" },
 				}).data.publicUrl;
 			return {
 				...record,

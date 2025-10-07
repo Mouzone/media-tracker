@@ -27,8 +27,7 @@
 	}
 	img {
 		display: block;
-		width: 100%;
-		height: auto;
+		object-fit: cover;
 	}
 
 	p {
