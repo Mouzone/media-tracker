@@ -1,3 +1,29 @@
-.env
+# Dependencies
 node_modules/
+
+# Production
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# System Files
 .DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Framework/Tooling
+.tanstack/
+.vercel/
+.next/
+
+# Test/Scratch files
+test_*.ts
+test_*.js
