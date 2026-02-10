@@ -14,7 +14,6 @@ export function NavBar() {
       <Link to="/" className="text-xl font-bold">Media Tracker</Link>
       <div className="flex gap-4 items-center">
         <Link to="/" className="hover:text-blue-500 [&.active]:text-blue-500">Dashboard</Link>
-        <Link to="/login" className="hover:text-blue-500 [&.active]:text-blue-500">Login</Link>
         <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">Sign Out</button>
       </div>
     </nav>

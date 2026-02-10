@@ -7,7 +7,9 @@ export function Auth() {
     <SupabaseAuth
       supabaseClient={supabase}
       appearance={{ theme: ThemeSupa }}
-      providers={['google', 'github']}
+      providers={[]}
+      view="sign_in"
+      showLinks={false}
       redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/` : undefined}
     />
   )

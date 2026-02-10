@@ -1,6 +1,7 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { Auth } from '../components/Auth'
 import { supabase } from '../utils/supabase'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/login')({
   component: Login,
@@ -13,6 +14,18 @@ export const Route = createFileRoute('/login')({
 })
 
 function Login() {
+  const router = useRouter()
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        router.navigate({ to: '/' })
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [router])
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
