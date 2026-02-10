@@ -29,7 +29,13 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
         <div className="text-white text-sm">
           <p className="font-bold truncate">{item.title}</p>
-          <p className="text-xs">{item.type} • {item.rating ? `${item.rating}/5` : 'Unrated'}</p>
+          <p className="text-xs">
+            {item.type === 'tv' && item.seasons 
+              ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 
+              : item.type} 
+            {' • '}
+            {item.rating ? `${item.rating}/5` : 'Unrated'}
+          </p>
         </div>
       </div>
     </motion.div>

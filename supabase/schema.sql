@@ -1,9 +1,15 @@
+-- Drop table if exists
+drop table if exists public.media_items cascade;
+
 -- Create a table for media items
 create table public.media_items (
   id uuid not null default gen_random_uuid (),
   user_id uuid not null references auth.users (id) on delete cascade,
   title text not null,
   type text not null check (type in ('movie', 'tv', 'book')),
+  status text not null check (status in ('finished', 'dropped')) default 'finished',
+  seasons integer null check (seasons >= 0),
+  language text null,
   cover_url text null,
   date_finished date null,
   review text null,
@@ -31,14 +37,18 @@ create policy "Users can delete their own items" on public.media_items
 
 -- Create storage bucket for covers
 insert into storage.buckets (id, name)
-values ('covers', 'covers');
+values ('covers', 'covers')
+on conflict (id) do nothing;
 
 -- Set up storage policies
+drop policy if exists "Cover images are publicly accessible" on storage.objects;
 create policy "Cover images are publicly accessible" on storage.objects
   for select using (bucket_id = 'covers');
 
+drop policy if exists "Users can upload cover images" on storage.objects;
 create policy "Users can upload cover images" on storage.objects
   for insert with check (bucket_id = 'covers' and auth.uid() = owner);
 
+drop policy if exists "Users can update their own cover images" on storage.objects;
 create policy "Users can update their own cover images" on storage.objects
   for update using (bucket_id = 'covers' and auth.uid() = owner);

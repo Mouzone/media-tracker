@@ -69,11 +69,31 @@ function Dashboard() {
   }
 
 
+  const [activeTab, setActiveTab] = useState<'movie' | 'tv' | 'book' | null>(null)
+
+  const handleTabClick = (type: 'movie' | 'tv' | 'book') => {
+    setActiveTab(current => current === type ? null : type)
+  }
+
+  const filteredItems = activeTab 
+    ? mediaItems.filter(item => item.type === activeTab)
+    : mediaItems
+
+  const getTabClass = (type: 'movie' | 'tv' | 'book') => {
+    const base = "px-3 py-1.5 rounded-md font-medium transition-colors"
+    const active = "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+    const inactive = "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"
+    return `${base} ${activeTab === type ? active : inactive}`
+  }
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-         <h1 className="text-3xl font-bold tracking-tight">My Wall</h1>
+         <div className="flex gap-4 items-center">
+            <button onClick={() => handleTabClick('movie')} className={getTabClass('movie')}>Movies</button>
+            <button onClick={() => handleTabClick('tv')} className={getTabClass('tv')}>TV Shows</button>
+            <button onClick={() => handleTabClick('book')} className={getTabClass('book')}>Books</button>
+         </div>
          <button 
             onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
@@ -84,14 +104,11 @@ function Dashboard() {
       
       {loading ? (
           <p className="text-center py-10">Loading...</p>
-      ) : mediaItems.length === 0 ? (
-          <div className="text-center py-20 text-gray-500">
-              <p className="text-xl">Your wall is empty.</p>
-              <p>Start tracking your movies, TV shows, and books!</p>
-          </div>
+      ) : filteredItems.length === 0 ? (
+          null
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {mediaItems.map(item => (
+            {filteredItems.map(item => (
             <MediaCard key={item.id} item={item} onClick={handleCardClick} />
             ))}
         </div>
@@ -101,6 +118,7 @@ function Dashboard() {
         item={selectedItem} 
         isOpen={isModalOpen} 
         onClose={handleClose}
+        existingTags={Array.from(new Set(mediaItems.flatMap(item => item.tags || [])))}
       />
     </div>
   )

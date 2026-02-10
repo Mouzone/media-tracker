@@ -1,10 +1,14 @@
 export type MediaType = 'movie' | 'tv' | 'book'
+export type StatusType = 'finished' | 'dropped'
 
 export interface MediaItem {
   id: string
   user_id: string
   title: string
   type: MediaType
+  status?: StatusType
+  seasons?: number | null
+  language?: string | null
   cover_url: string | null
   date_finished: string | null
   review: string | null
