@@ -1,38 +1,48 @@
-# sv
+# Media Tracker
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A PWA-ready media tracking application built with **TanStack Start**, **Supabase**, and **Tailwind CSS**.
 
-## Creating a project
+## Features
+- **Wall of Covers**: Visual dashboard for Movies, TV Shows, and Books.
+- **PWA Support**: Installable on mobile devices with key meta tags and manifest.
+- **Supabase Integration**: Auth, Database, and Storage (Schema provided).
+- **Mock Data Mode**: Works without credentials for UI preview.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Getting Started
 
-```sh
-# create a new project in the current directory
-npx sv create
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    # Note: Requires Node.js 18+ (tested on v24)
+    ```
 
-# create a new project in my-app
-npx sv create my-app
-```
+2.  **Environment Setup**:
+    Copy `.env` and fill in your Supabase credentials:
+    ```bash
+    SUPABASE_URL=...
+    SUPABASE_ANON_KEY=...
+    ```
 
-## Developing
+3.  **Database Setup**:
+    Run the SQL script in `supabase/schema.sql` in your Supabase Dashboard (SQL Editor).
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+4.  **Run Development Server**:
+    ```bash
+    npm run dev
+    ```
 
-```sh
-npm run dev
+## Deployment (Vercel)
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+1.  Push to GitHub.
+2.  Import project in Vercel.
+3.  Set **Framework Preset** to "Vite" or "Other".
+4.  Add Environment Variables (`SUPABASE_URL`, etc.).
+5.  Deploy!
 
-## Building
-
-To create a production version of your app:
-
-```sh
+## PWA
+To test PWA features, build and preview:
+```bash
 npm run build
+npm run start
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Then open in browser and look for the install icon.
