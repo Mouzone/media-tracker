@@ -1,18 +1,17 @@
 import { Dialog } from '@headlessui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MediaItem } from '../types'
-import { useState } from 'react'
+
 
 interface MediaModalProps {
   item: MediaItem | null
   isOpen: boolean
   onClose: () => void
-  onSave: (item: MediaItem) => void
 }
 
-export function MediaModal({ item, isOpen, onClose, onSave }: MediaModalProps) {
+export function MediaModal({ item, isOpen, onClose }: MediaModalProps) {
     // Placeholder for form state
-    const [title, setTitle] = useState(item?.title || '')
+
     
   return (
     <AnimatePresence>

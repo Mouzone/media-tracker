@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { NavBar } from '../../components/NavBar'
+import { NavBar } from '../components/NavBar'
 
 export const Route = createFileRoute('/_layout')({
   component: Layout,

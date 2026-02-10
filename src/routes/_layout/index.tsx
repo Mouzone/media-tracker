@@ -68,34 +68,7 @@ function Dashboard() {
     setIsModalOpen(false)
   }
 
-  const handleSave = async (item: Partial<MediaItem>) => {
-      try {
-        setLoading(true)
-        const { data: { session } } = await supabase.auth.getSession()
-        
-        // Mock save if no session, just to show UI feedback
-        if (!session) {
-             console.log("Mock saving", item)
-             await new Promise(resolve => setTimeout(resolve, 500))
-             handleClose()
-             setLoading(false)
-             return
-        }
 
-        const { error } = await supabase
-            .from('media_items')
-            .upsert({ ...item, user_id: session.user.id })
-
-        if (error) throw error
-        
-        await fetchItems()
-        handleClose()
-      } catch (e) {
-          console.error("Failed to save", e)
-          alert("Failed to save item")
-          setLoading(false)
-      }
-  }
 
   return (
     <div>
@@ -128,7 +101,6 @@ function Dashboard() {
         item={selectedItem} 
         isOpen={isModalOpen} 
         onClose={handleClose}
-        onSave={handleSave as any}
       />
     </div>
   )
