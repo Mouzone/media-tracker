@@ -2,6 +2,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment, useState, useEffect } from 'react'
 import { MediaItem, MediaType, StatusType } from '../types'
 import { searchMedia, SearchResult } from '../services/api'
+import { uploadCoverImage, validateImageResponse } from '../services/storage'
 import { supabase } from '../utils/supabase'
 import { X, Search, Plus, Loader2, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import clsx from 'clsx'
@@ -250,24 +251,51 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                         )}
 
                         {/* Cover Image */}
-                        <div className="relative aspect-[2/3] w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-700 group">
+                        <div className="relative aspect-[2/3] w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-700 group transition-colors hover:border-blue-500 cursor-pointer">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                onChange={async (e) => {
+                                    const file = e.target.files?.[0]
+                                    if (!file) return
+
+                                    // Validate
+                                    const { valid, error } = await validateImageResponse(file)
+                                    if (!valid) {
+                                        alert(error)
+                                        return
+                                    }
+
+                                    // Upload
+                                    setIsLoading(true)
+                                    try {
+                                        const user = await supabase.auth.getUser()
+                                        if (user.data.user?.id) {
+                                            const url = await uploadCoverImage(file, user.data.user.id)
+                                            if (url) setCoverUrl(url)
+                                        }
+                                    } catch (err) {
+                                        alert('Failed to upload image')
+                                    } finally {
+                                        setIsLoading(false)
+                                    }
+                                }}
+                            />
                             {coverUrl ? (
-                                <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                                <>
+                                    <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                        <div className="text-white font-medium">Change Cover</div>
+                                    </div>
+                                </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                    <div className="mb-2">No Cover</div>
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400 p-4 text-center">
+                                    <Plus className="w-8 h-8 mb-2" />
+                                    <div className="text-sm font-medium">Upload Cover</div>
+                                    <div className="text-xs mt-1">Min: 300x450 • Max: 5MB</div>
                                 </div>
                             )}
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <input 
-                                    type="text" 
-                                    placeholder="Paste URL..." 
-                                    className="w-3/4 p-2 text-sm rounded bg-white/90 text-black placeholder-gray-500 outline-none"
-                                    value={coverUrl}
-                                    onChange={(e) => setCoverUrl(e.target.value)}
-                                    onClick={(e) => e.stopPropagation()}
-                                />
-                            </div>
                         </div>
                     </div>
 
