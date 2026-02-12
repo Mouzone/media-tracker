@@ -20,7 +20,7 @@ function Dashboard() {
       try {
           const { data, error } = await supabase.from('media_items').select('*').order('created_at', { ascending: false })
           
-          if (error || !data) {
+          if (error || !data || data.length === 0) {
               console.warn("Using mock data")
                const mockData: MediaItem[] = [
                 {
@@ -114,14 +114,20 @@ function Dashboard() {
 
 
   const [activeTab, setActiveTab] = useState<'movie' | 'tv' | 'book' | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const handleTabClick = (type: 'movie' | 'tv' | 'book') => {
     setActiveTab(current => current === type ? null : type)
   }
 
-  const filteredItems = activeTab 
-    ? mediaItems.filter(item => item.type === activeTab)
-    : mediaItems
+  const filteredItems = mediaItems.filter(item => {
+    const matchesTab = activeTab ? item.type === activeTab : true
+    const searchLower = searchQuery.toLowerCase()
+    const matchesSearch = item.title.toLowerCase().includes(searchLower) ||
+                          (item.review && item.review.toLowerCase().includes(searchLower)) ||
+                          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+    return matchesTab && matchesSearch
+  })
 
   const getTabClass = (type: 'movie' | 'tv' | 'book') => {
     const base = "px-3 py-1.5 rounded-md font-medium transition-colors"
@@ -137,6 +143,15 @@ function Dashboard() {
             <button onClick={() => handleTabClick('movie')} className={getTabClass('movie')}>Movies</button>
             <button onClick={() => handleTabClick('tv')} className={getTabClass('tv')}>TV Shows</button>
             <button onClick={() => handleTabClick('book')} className={getTabClass('book')}>Books</button>
+         </div>
+         <div className="flex-1 max-w-md mx-4">
+            <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
          </div>
          <div className="flex gap-2">
             <Link 
