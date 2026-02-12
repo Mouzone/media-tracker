@@ -24,6 +24,13 @@ yarn-error.log*
 .vercel/
 .next/
 
+# IDE
+.vscode/
+.idea/
+
 # Test/Scratch files
 test_*.ts
 test_*.js
+
+# Package manager lock files (optional, uncomment if desired)
+# package-lock.json

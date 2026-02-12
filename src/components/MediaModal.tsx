@@ -4,7 +4,7 @@ import { MediaItem, MediaType, StatusType } from '../types'
 import { searchMedia, SearchResult } from '../services/api'
 import { uploadCoverImage, validateImageResponse } from '../services/storage'
 import { supabase } from '../utils/supabase'
-import { X, Search, Plus, Loader2, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { X, Search, Plus, Loader2, Calendar, CheckCircle, XCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
 import clsx from 'clsx'
 
 interface MediaModalProps {
@@ -22,7 +22,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [title, setTitle] = useState('')
   const [review, setReview] = useState('')
   const [dateFinished, setDateFinished] = useState('')
-  const [rating, setRating] = useState<number>(0)
+  const [rating, setRating] = useState<'like' | 'dislike' | null>(null)
   const [coverUrl, setCoverUrl] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
@@ -43,7 +43,8 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setTitle(item.title)
         setReview(item.review || '')
         setDateFinished(item.date_finished || '')
-        setRating(item.rating || 0)
+        setDateFinished(item.date_finished || '')
+        setRating(item.rating || null)
         setCoverUrl(item.cover_url || '')
         setTags(item.tags || [])
       } else {
@@ -55,7 +56,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setTitle('')
         setReview('')
         setDateFinished(new Date().toISOString().split('T')[0]) // Default to today
-        setRating(0)
+        setRating(null)
         setCoverUrl('')
         setTags([])
       }
@@ -99,7 +100,9 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         date_finished: dateFinished || null,
         review,
         tags,
-        rating: rating > 0 ? rating : null
+        review,
+        tags,
+        rating: rating // already correct type
     }
 
     let error
@@ -403,16 +406,26 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                         <div>
                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating</label>
                              <div className="flex gap-2">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button 
-                                        key={star}
-                                        type="button"
-                                        onClick={() => setRating(star)}
-                                        className={`text-2xl transition-transform hover:scale-110 ${rating >= star ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
-                                    >
-                                        ★
-                                    </button>
-                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setRating(rating === 'like' ? null : 'like')}
+                                    className={clsx(
+                                        "p-2 rounded-full transition-colors",
+                                        rating === 'like' ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    )}
+                                >
+                                    <ThumbsUp className="w-6 h-6" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setRating(rating === 'dislike' ? null : 'dislike')}
+                                    className={clsx(
+                                        "p-2 rounded-full transition-colors",
+                                        rating === 'dislike' ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    )}
+                                >
+                                    <ThumbsDown className="w-6 h-6" />
+                                </button>
                              </div>
                         </div>
 

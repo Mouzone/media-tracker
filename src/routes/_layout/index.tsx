@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { MediaCard } from '../../components/MediaCard'
 import { MediaModal } from '../../components/MediaModal'
 import { useState, useEffect } from 'react'
@@ -31,7 +31,7 @@ function Dashboard() {
                 date_finished: '2023-11-15',
                 review: 'Mind bending!',
                 tags: ['scifi', 'thriller'],
-                rating: 5,
+                rating: 'like',
                 created_at: new Date().toISOString()
             },
             {
@@ -43,7 +43,7 @@ function Dashboard() {
                 date_finished: '2023-10-01',
                 review: 'Best show ever.',
                 tags: ['drama', 'crime'],
-                rating: 5,
+                rating: 'like',
                 created_at: new Date().toISOString()
             }
         ]
@@ -94,12 +94,20 @@ function Dashboard() {
             <button onClick={() => handleTabClick('tv')} className={getTabClass('tv')}>TV Shows</button>
             <button onClick={() => handleTabClick('book')} className={getTabClass('book')}>Books</button>
          </div>
-         <button 
-            onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
-         >
-            + Add Item
-         </button>
+         <div className="flex gap-2">
+            <Link 
+                to="/bulk-upload"
+                className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg font-medium transition-colors hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+                Bulk Upload
+            </Link>
+            <button 
+                onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-sm"
+            >
+                + Add Item
+            </button>
+         </div>
       </div>
       
       {loading ? (

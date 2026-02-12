@@ -1,5 +1,6 @@
 import { MediaItem } from '../types'
 import { motion } from 'framer-motion'
+import { ThumbsUp, ThumbsDown } from 'lucide-react'
 
 interface MediaCardProps {
   item: MediaItem
@@ -34,7 +35,9 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
               ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 
               : item.type} 
             {' • '}
-            {item.rating ? `${item.rating}/5` : 'Unrated'}
+            {item.rating === 'like' && <ThumbsUp className="w-4 h-4 inline text-green-500" />}
+            {item.rating === 'dislike' && <ThumbsDown className="w-4 h-4 inline text-red-500" />}
+            {!item.rating && 'Unrated'}
           </p>
         </div>
       </div>

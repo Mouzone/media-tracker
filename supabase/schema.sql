@@ -14,7 +14,7 @@ create table public.media_items (
   date_finished date null,
   review text null,
   tags text[] null,
-  rating integer null check (rating >= 1 and rating <= 5),
+  rating text null check (rating in ('like', 'dislike')),
   created_at timestamp with time zone not null default now(),
   constraint media_items_pkey primary key (id)
 ) tablespace pg_default;
