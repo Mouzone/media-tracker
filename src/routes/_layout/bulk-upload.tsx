@@ -20,6 +20,7 @@ interface BulkItem {
   review: string
   tags: string[]
   cover_url?: string
+  cover_path?: string
   date_finished: string
   seasons?: number
   language: string
@@ -117,9 +118,9 @@ function BulkUpload() {
     try {
         const user = await supabase.auth.getUser()
         if (user.data.user?.id) {
-            const url = await uploadCoverImage(file, user.data.user.id)
-            if (url) {
-                updateItem(id, { cover_url: url })
+            const result = await uploadCoverImage(file, user.data.user.id)
+            if (result) {
+                updateItem(id, { cover_url: result.signedUrl, cover_path: result.path })
             }
         }
     } catch (err) {
@@ -154,7 +155,7 @@ function BulkUpload() {
         rating: item.rating || null,
         review: item.review || null,
         tags: item.tags.length ? item.tags : null,
-        cover_url: item.cover_url || null,
+        cover_url: item.cover_path || item.cover_url || null,
         date_finished: item.date_finished || null,
         seasons: item.type === 'tv' && item.seasons ? item.seasons : null,
         language: item.language || 'English',

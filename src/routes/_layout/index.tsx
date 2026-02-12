@@ -49,7 +49,45 @@ function Dashboard() {
         ]
         setMediaItems(mockData)
       } else {
-          setMediaItems(data as MediaItem[])
+          // Resolve signed URLs for private paths (or legacy public URLs)
+          const urlToPathMap: Record<string, string> = {}
+          const pathsToSign: string[] = []
+
+          (data as MediaItem[]).forEach(item => {
+              if (!item.cover_url) return
+
+              if (!item.cover_url.startsWith('http')) {
+                  urlToPathMap[item.cover_url] = item.cover_url
+                  pathsToSign.push(item.cover_url)
+              } else if (item.cover_url.includes('/covers/')) {
+                  // Handle legacy public URLs that are now private
+                  // Format: .../storage/v1/object/public/covers/userId/filename
+                  const parts = item.cover_url.split('/covers/')
+                  if (parts.length > 1) {
+                      const path = parts[1] // "userId/filename"
+                      urlToPathMap[item.cover_url] = path
+                      pathsToSign.push(path)
+                  }
+              }
+          })
+          
+          if (pathsToSign.length > 0) {
+              const { getSignedUrls } = await import('../../services/storage')
+              const signedUrls = await getSignedUrls(pathsToSign)
+              
+              const itemsWithSignedUrls = (data as MediaItem[]).map(item => {
+                  if (item.cover_url) {
+                      const path = urlToPathMap[item.cover_url]
+                      if (path && signedUrls[path]) {
+                          return { ...item, signed_url: signedUrls[path] }
+                      }
+                  }
+                  return item
+              })
+              setMediaItems(itemsWithSignedUrls)
+          } else {
+              setMediaItems(data as MediaItem[])
+          }
       }
       setLoading(false)
   }

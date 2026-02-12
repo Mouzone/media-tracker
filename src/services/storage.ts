@@ -1,6 +1,6 @@
 import { supabase } from '../utils/supabase'
 
-export const uploadCoverImage = async (file: File, userId: string): Promise<string | null> => {
+export const uploadCoverImage = async (file: File, userId: string): Promise<{ path: string; signedUrl: string } | null> => {
     const fileExt = file.name.split('.').pop()
     const fileName = `${userId}/${Date.now()}.${fileExt}`
     const filePath = `${fileName}`
@@ -14,11 +14,56 @@ export const uploadCoverImage = async (file: File, userId: string): Promise<stri
         throw uploadError
     }
 
-    const { data } = supabase.storage
+    // For private buckets, we can't just get the public URL.
+    // We need to sign a URL.
+    const { data: signedData, error: signError } = await supabase.storage
         .from('covers')
-        .getPublicUrl(filePath)
+        .createSignedUrl(filePath, 60 * 60 * 24 * 365) // 1 year expiry for immediate display
 
-    return data.publicUrl
+    if (signError) {
+        console.error('Error signing URL:', signError)
+        throw signError
+    }
+
+    return {
+        path: filePath,
+        signedUrl: signedData.signedUrl
+    }
+}
+
+export const getSignedUrl = async (path: string): Promise<string | null> => {
+    // If it's already an HTTP URL (external), return it
+    if (path.startsWith('http')) return path
+
+    const { data, error } = await supabase.storage
+        .from('covers')
+        .createSignedUrl(path, 60 * 60) // 1 hour
+
+    if (error) {
+        console.error('Error creating signed URL:', error)
+        return null
+    }
+
+    return data.signedUrl
+}
+
+export const getSignedUrls = async (paths: string[]): Promise<Record<string, string>> => {
+    const { data, error } = await supabase.storage
+        .from('covers')
+        .createSignedUrls(paths, 60 * 60) // 1 hour
+
+    if (error || !data) {
+        console.error('Error creating signed URLs:', error)
+        return {}
+    }
+
+    const result: Record<string, string> = {}
+    data.forEach(item => {
+        if (item.signedUrl) {
+            result[item.path] = item.signedUrl
+        }
+    })
+    return result
 }
 
 export const validateImageResponse = (file: File): Promise<{ valid: boolean; error?: string }> => {

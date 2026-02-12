@@ -24,6 +24,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [dateFinished, setDateFinished] = useState('')
   const [rating, setRating] = useState<'like' | 'dislike' | null>(null)
   const [coverUrl, setCoverUrl] = useState('')
+  const [newCoverPath, setNewCoverPath] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   
@@ -43,10 +44,24 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setTitle(item.title)
         setReview(item.review || '')
         setDateFinished(item.date_finished || '')
-        setDateFinished(item.date_finished || '')
         setRating(item.rating || null)
-        setCoverUrl(item.cover_url || '')
         setTags(item.tags || [])
+        
+        // Handle signed URL resolution
+        const isPath = item.cover_url && !item.cover_url.startsWith('http')
+        const isLegacyUrl = item.cover_url && item.cover_url.includes('/covers/')
+        
+        if (isPath || isLegacyUrl) {
+             const path = isPath ? item.cover_url! : item.cover_url!.split('/covers/')[1]
+             
+             import('../services/storage').then(({ getSignedUrl }) => {
+                 getSignedUrl(path).then(url => {
+                     if (url) setCoverUrl(url)
+                 })
+             })
+        } else {
+            setCoverUrl(item.cover_url || '')
+        }
       } else {
         // Reset defaults for new item
         setType('movie')
@@ -63,23 +78,38 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
       setSearchResults([])
       setShowResults(false)
       setTagInput('')
+      setNewCoverPath(null)
     }
   }, [isOpen, item])
 
-  // Search effect
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (title.length > 2 && !item) { // Only search on new items or if explicitly requested
-         setIsSearching(true)
-         const results = await searchMedia(title, type)
-         setSearchResults(results)
-         setIsSearching(false)
-         setShowResults(true)
-      }
-    }, 500)
+  const suggestedTags = existingTags
+    .filter(tag => !tags.includes(tag) && tag.toLowerCase().includes(tagInput.toLowerCase()))
+    .slice(0, 5)
 
-    return () => clearTimeout(timer)
-  }, [title, type, item])
+  const removeTag = (tagToRemove: string) => {
+      setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  const handleTagKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault()
+          const newTag = tagInput.trim()
+          if (newTag && !tags.includes(newTag)) {
+              setTags([...tags, newTag])
+              setTagInput('')
+          }
+      }
+  }
+
+  const handleResultSelect = (result: SearchResult) => {
+      setTitle(result.title)
+      setType(result.type)
+      setCoverUrl(result.cover_url || '')
+      setNewCoverPath(null) // Reset custom upload if picking from search
+      // Assuming result might have release date we could use?
+      // For now just basic info
+      setShowResults(false)
+  }
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -96,12 +126,11 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         status,
         seasons: seasons ? Number(seasons) : null,
         language,
-        cover_url: coverUrl,
+        cover_url: newCoverPath || (item?.cover_url || null),
         date_finished: dateFinished || null,
         review,
         tags,
-
-        rating: rating // already correct type
+        rating
     }
 
     let error
@@ -128,32 +157,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     }
   }
 
-  const handleResultSelect = (result: SearchResult) => {
-    setTitle(result.title)
-    if (result.cover_url) setCoverUrl(result.cover_url)
-    setShowResults(false)
-  }
-
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-        e.preventDefault()
-        if (!tags.includes(tagInput.trim())) {
-            setTags([...tags, tagInput.trim()])
-        }
-        setTagInput('')
-    } else if (e.key === 'Backspace' && !tagInput && tags.length > 0) {
-        setTags(tags.slice(0, -1))
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-      setTags(tags.filter(tag => tag !== tagToRemove))
-  }
-  
-  const suggestedTags = tagInput 
-    ? existingTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(t))
-    : []
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -166,7 +169,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/25" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -180,82 +183,25 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-lg font-medium leading-6 dark:text-white mb-6 flex justify-between items-center">
-                  {item ? 'Edit Media' : 'Add New Media'}
-                  <button onClick={onClose} className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
+                <div className="flex justify-between items-start mb-6">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
+                    {item ? 'Edit Item' : 'Add New Item'}
+                  </Dialog.Title>
+                  <button
+                    onClick={onClose}
+                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  >
                     <X className="w-5 h-5" />
                   </button>
-                </Dialog.Title>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Left Column: Cover & Type */}
-                    <div className="space-y-6">
-                         {/* Type Selection */}
-                         <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                            {(['movie', 'tv', 'book'] as const).map((t) => (
-                                <button
-                                    key={t}
-                                    onClick={() => setType(t)}
-                                    className={clsx(
-                                        "flex-1 py-2 text-sm font-medium rounded-md capitalize transition-all",
-                                        type === t 
-                                            ? "bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-blue-400" 
-                                            : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                                    )}
-                                >
-                                    {t === 'tv' ? 'TV Show' : t}
-                                </button>
-                            ))}
-                        </div>
+                </div>
 
-                         {/* Status Selection */}
-                         <div className="flex gap-2">
-                            <button
-                                onClick={() => setStatus('finished')}
-                                className={clsx(
-                                    "flex-1 py-2 px-3 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-2",
-                                    status === 'finished' 
-                                        ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 ring-1 ring-green-500" 
-                                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                )}
-                            >
-                                <CheckCircle className="w-4 h-4" />
-                                Finished
-                            </button>
-                            <button
-                                onClick={() => setStatus('dropped')}
-                                className={clsx(
-                                    "flex-1 py-2 px-3 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-2",
-                                    status === 'dropped' 
-                                        ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 ring-1 ring-red-500" 
-                                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
-                                )}
-                            >
-                                <XCircle className="w-4 h-4" />
-                                Dropped
-                            </button>
-                        </div>
-                        
-                        {/* Seasons Input (TV Only) */}
-                        {type === 'tv' && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seasons Watched</label>
-                                <input 
-                                    type="number" 
-                                    min="0"
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    placeholder="e.g. 1"
-                                    value={seasons}
-                                    onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
-                                />
-                            </div>
-                        )}
-
-                        {/* Cover Image */}
-                        <div className="relative aspect-[2/3] w-full bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-700 group transition-colors hover:border-blue-500 cursor-pointer">
-                            <input
-                                type="file"
+                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+                    {/* Left Column: Cover */}
+                    <div>
+                        <div className="aspect-[2/3] relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 group border border-gray-200 dark:border-gray-700">
+                            <input 
+                                type="file" 
                                 accept="image/*"
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                 onChange={async (e) => {
@@ -274,10 +220,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     try {
                                         const user = await supabase.auth.getUser()
                                         if (user.data.user?.id) {
-                                            const url = await uploadCoverImage(file, user.data.user.id)
-                                            if (url) setCoverUrl(url)
+                                            const result = await uploadCoverImage(file, user.data.user.id)
+                                            if (result) {
+                                                setCoverUrl(result.signedUrl)
+                                                setNewCoverPath(result.path)
+                                            }
                                         }
                                     } catch (err) {
+                                        console.error(err)
                                         alert('Failed to upload image')
                                     } finally {
                                         setIsLoading(false)
@@ -303,6 +253,49 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
 
                     {/* Right Column: Details */}
                     <div className="space-y-4">
+                        {/* Type & Status */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                <select 
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                                    value={type}
+                                    onChange={(e) => setType(e.target.value as MediaType)}
+                                >
+                                    <option value="movie">Movie</option>
+                                    <option value="tv">TV Show</option>
+                                    <option value="book">Book</option>
+                                    <option value="game">Game</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                <select 
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value as StatusType)}
+                                >
+                                    <option value="backlog">Backlog</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="finished">Finished</option>
+                                    <option value="dropped">Dropped</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        {type === 'tv' && (
+                             <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seasons</label>
+                                <input 
+                                    type="number"
+                                    min="1"
+                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    value={seasons}
+                                    onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
+                                />
+                            </div>
+                        )}
+
                         {/* Language Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>

@@ -15,9 +15,9 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       onClick={() => onClick(item)}
       whileHover={{ scale: 1.02 }}
     >
-      {item.cover_url ? (
+      {item.signed_url || item.cover_url ? (
         <img 
-          src={item.cover_url} 
+          src={item.signed_url || item.cover_url || ''} 
           alt={item.title} 
           className="w-full h-full object-cover"
           loading="lazy"

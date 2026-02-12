@@ -15,6 +15,7 @@ export interface MediaItem {
   tags: string[]
   rating: 'like' | 'dislike' | null
   created_at: string
+  signed_url?: string
 }
 
 export interface MediaItemInsert {
