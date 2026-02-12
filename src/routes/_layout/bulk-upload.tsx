@@ -82,7 +82,7 @@ function BulkUpload() {
         tags: [],
         review: '',
         language: 'English',
-        date_finished: new Date().toISOString().split('T')[0],
+        date_finished: '',
         selected: true
       }
     })
