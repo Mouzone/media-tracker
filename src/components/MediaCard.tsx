@@ -33,7 +33,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
           <p className="text-xs">
             {item.type === 'tv' && item.seasons 
               ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 
-              : item.type} 
+              : <span className="capitalize">{item.type}</span>} 
             {' • '}
             {item.rating === 'like' && <ThumbsUp className="w-4 h-4 inline text-green-500" />}
             {item.rating === 'dislike' && <ThumbsDown className="w-4 h-4 inline text-red-500" />}

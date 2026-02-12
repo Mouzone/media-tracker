@@ -17,79 +17,85 @@ function Dashboard() {
 
   const fetchItems = async () => {
       setLoading(true)
-      const { data, error } = await supabase.from('media_items').select('*').order('created_at', { ascending: false })
-      
-      if (error || !data) {
-          console.warn("Using mock data")
-           const mockData: MediaItem[] = [
-            {
-                id: '1',
-                user_id: 'mock',
-                title: 'Inception',
-                type: 'movie',
-                cover_url: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-                date_finished: '2023-11-15',
-                review: 'Mind bending!',
-                tags: ['scifi', 'thriller'],
-                rating: 'like',
-                created_at: new Date().toISOString()
-            },
-            {
-                id: '2',
-                user_id: 'mock',
-                title: 'Breaking Bad',
-                type: 'tv',
-                cover_url: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-                date_finished: '2023-10-01',
-                review: 'Best show ever.',
-                tags: ['drama', 'crime'],
-                rating: 'like',
-                created_at: new Date().toISOString()
-            }
-        ]
-        setMediaItems(mockData)
-      } else {
-          // Resolve signed URLs for private paths (or legacy public URLs)
-          const urlToPathMap: Record<string, string> = {}
-          const pathsToSign: string[] = []
-
-          (data as MediaItem[]).forEach(item => {
-              if (!item.cover_url) return
-
-              if (!item.cover_url.startsWith('http')) {
-                  urlToPathMap[item.cover_url] = item.cover_url
-                  pathsToSign.push(item.cover_url)
-              } else if (item.cover_url.includes('/covers/')) {
-                  // Handle legacy public URLs that are now private
-                  // Format: .../storage/v1/object/public/covers/userId/filename
-                  const parts = item.cover_url.split('/covers/')
-                  if (parts.length > 1) {
-                      const path = parts[1] // "userId/filename"
-                      urlToPathMap[item.cover_url] = path
-                      pathsToSign.push(path)
-                  }
-              }
-          })
+      try {
+          const { data, error } = await supabase.from('media_items').select('*').order('created_at', { ascending: false })
           
-          if (pathsToSign.length > 0) {
-              const { getSignedUrls } = await import('../../services/storage')
-              const signedUrls = await getSignedUrls(pathsToSign)
-              
-              const itemsWithSignedUrls = (data as MediaItem[]).map(item => {
-                  if (item.cover_url) {
-                      const path = urlToPathMap[item.cover_url]
-                      if (path && signedUrls[path]) {
-                          return { ...item, signed_url: signedUrls[path] }
+          if (error || !data) {
+              console.warn("Using mock data")
+               const mockData: MediaItem[] = [
+                {
+                    id: '1',
+                    user_id: 'mock',
+                    title: 'Inception',
+                    type: 'movie',
+                    cover_url: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
+                    date_finished: '2023-11-15',
+                    review: 'Mind bending!',
+                    tags: ['scifi', 'thriller'],
+                    rating: 'like',
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    user_id: 'mock',
+                    title: 'Breaking Bad',
+                    type: 'tv',
+                    cover_url: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+                    date_finished: '2023-10-01',
+                    review: 'Best show ever.',
+                    tags: ['drama', 'crime'],
+                    rating: 'like',
+                    created_at: new Date().toISOString()
+                }
+            ]
+            setMediaItems(mockData)
+          } else {
+              // Resolve signed URLs for private paths (or legacy public URLs)
+              const urlToPathMap: Record<string, string> = {}
+              const pathsToSign: string[] = []
+              const items = data as MediaItem[]
+
+              items.forEach(item => {
+                  if (!item.cover_url) return
+
+                  if (!item.cover_url.startsWith('http')) {
+                      urlToPathMap[item.cover_url] = item.cover_url
+                      pathsToSign.push(item.cover_url)
+                  } else if (item.cover_url.includes('/covers/')) {
+                      // Handle legacy public URLs that are now private
+                      // Format: .../storage/v1/object/public/covers/userId/filename
+                      const parts = item.cover_url.split('/covers/')
+                      if (parts.length > 1) {
+                          const path = parts[1] // "userId/filename"
+                          urlToPathMap[item.cover_url] = path
+                          pathsToSign.push(path)
                       }
                   }
-                  return item
               })
-              setMediaItems(itemsWithSignedUrls)
-          } else {
-              setMediaItems(data as MediaItem[])
+              
+              if (pathsToSign.length > 0) {
+                  const { getSignedUrls } = await import('../../services/storage')
+                  const signedUrls = await getSignedUrls(pathsToSign)
+                  
+                  const itemsWithSignedUrls = (data as MediaItem[]).map(item => {
+                      if (item.cover_url) {
+                          const path = urlToPathMap[item.cover_url]
+                          if (path && signedUrls[path]) {
+                              return { ...item, signed_url: signedUrls[path] }
+                          }
+                      }
+                      return item
+                  })
+                  setMediaItems(itemsWithSignedUrls)
+              } else {
+                  setMediaItems(data as MediaItem[])
+              }
           }
+      } catch (err) {
+          console.error("Failed to fetch items:", err)
+      } finally {
+          setLoading(false)
       }
-      setLoading(false)
   }
 
   useEffect(() => {
