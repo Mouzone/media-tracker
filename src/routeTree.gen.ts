@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutBulkUploadRouteImport } from './routes/_layout/bulk-upload'
 import { Route as LayoutCategoryRouteImport } from './routes/_layout/$category'
 
 const LoginRoute = LoginRouteImport.update({
@@ -28,6 +29,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutBulkUploadRoute = LayoutBulkUploadRouteImport.update({
+  id: '/bulk-upload',
+  path: '/bulk-upload',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutCategoryRoute = LayoutCategoryRouteImport.update({
   id: '/$category',
   path: '/$category',
@@ -38,10 +44,12 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
   '/$category': typeof LayoutCategoryRoute
+  '/bulk-upload': typeof LayoutBulkUploadRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/$category': typeof LayoutCategoryRoute
+  '/bulk-upload': typeof LayoutBulkUploadRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
@@ -49,14 +57,21 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
   '/_layout/$category': typeof LayoutCategoryRoute
+  '/_layout/bulk-upload': typeof LayoutBulkUploadRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/$category'
+  fullPaths: '/' | '/login' | '/$category' | '/bulk-upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/$category' | '/'
-  id: '__root__' | '/_layout' | '/login' | '/_layout/$category' | '/_layout/'
+  to: '/login' | '/$category' | '/bulk-upload' | '/'
+  id:
+    | '__root__'
+    | '/_layout'
+    | '/login'
+    | '/_layout/$category'
+    | '/_layout/bulk-upload'
+    | '/_layout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/bulk-upload': {
+      id: '/_layout/bulk-upload'
+      path: '/bulk-upload'
+      fullPath: '/bulk-upload'
+      preLoaderRoute: typeof LayoutBulkUploadRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/$category': {
       id: '/_layout/$category'
       path: '/$category'
@@ -99,11 +121,13 @@ declare module '@tanstack/react-router' {
 
 interface LayoutRouteChildren {
   LayoutCategoryRoute: typeof LayoutCategoryRoute
+  LayoutBulkUploadRoute: typeof LayoutBulkUploadRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCategoryRoute: LayoutCategoryRoute,
+  LayoutBulkUploadRoute: LayoutBulkUploadRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 
