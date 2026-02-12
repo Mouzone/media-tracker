@@ -100,8 +100,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         date_finished: dateFinished || null,
         review,
         tags,
-        review,
-        tags,
+
         rating: rating // already correct type
     }
 

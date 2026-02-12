@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { MediaType, StatusType } from '../../types'
 import { Save, Trash2, Loader2, Image as ImageIcon, ThumbsUp, ThumbsDown } from 'lucide-react'
 import { supabase } from '../../utils/supabase'
@@ -32,10 +32,36 @@ interface BulkItem {
 function BulkUpload() {
   const router = useRouter()
   const [inputData, setInputData] = useState('')
-  const [items, setItems] = useState<BulkItem[]>([])
-  const [isReviewing, setIsReviewing] = useState(false)
+  
+  // Initialize from localStorage if available
+  const [items, setItems] = useState<BulkItem[]>(() => {
+    if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('media-tracker-bulk-items')
+        if (saved) {
+            try {
+                return JSON.parse(saved)
+            } catch (e) {
+                console.error("Failed to parse saved items", e)
+            }
+        }
+    }
+    return []
+  })
+
+  // If we have items, we are reviewing
+  const [isReviewing, setIsReviewing] = useState(() => items.length > 0)
+  
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
+
+  // Persist to localStorage whenever items change
+  useEffect(() => {
+    if (items.length > 0) {
+        localStorage.setItem('media-tracker-bulk-items', JSON.stringify(items))
+    } else {
+        localStorage.removeItem('media-tracker-bulk-items')
+    }
+  }, [items])
 
   // Parsing Logic
   const handleParse = () => {
@@ -68,6 +94,7 @@ function BulkUpload() {
     setInputData('')
     setItems([])
     setIsReviewing(false)
+    localStorage.removeItem('media-tracker-bulk-items')
   }
 
   const updateItem = (id: string, updates: Partial<BulkItem>) => {
