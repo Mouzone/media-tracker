@@ -31,5 +31,7 @@ export const useMediaItems = ({ filter }: UseMediaItemsProps = {}) => {
       return allPages.length
     },
     initialPageParam: 0,
+    staleTime: Infinity, // Keep data fresh forever (until manual invalidation)
+    gcTime: Infinity,   // Keep unused data in garbage collection forever
   })
 }

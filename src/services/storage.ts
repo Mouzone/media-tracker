@@ -74,8 +74,8 @@ export const validateImageResponse = (file: File): Promise<{ valid: boolean; err
             URL.revokeObjectURL(img.src)
             const { width, height } = img
 
-            if (file.size > 5 * 1024 * 1024) {
-                 resolve({ valid: false, error: 'Image must be less than 5MB' })
+            if (file.size > 20 * 1024 * 1024) {
+                 resolve({ valid: false, error: 'Image must be less than 20MB' })
                  return
             }
 

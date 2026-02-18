@@ -47,10 +47,13 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setTags(item.tags || [])
         
         // Handle signed URL resolution
+        // Optimization: Use existing signed_url if available for instant display
         const isPath = item.cover_url && !item.cover_url.startsWith('http')
         const isLegacyUrl = item.cover_url && item.cover_url.includes('/covers/')
         
-        if (isPath || isLegacyUrl) {
+        if (item.signed_url) {
+            setCoverUrl(item.signed_url)
+        } else if (isPath || isLegacyUrl) {
              const path = isPath ? item.cover_url! : item.cover_url!.split('/covers/')[1]
              
              import('../services/storage').then(({ getSignedUrl }) => {

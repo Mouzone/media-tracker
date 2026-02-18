@@ -40,8 +40,7 @@ function Dashboard() {
       return data?.pages.flatMap(page => page) || []
   }, [data])
 
-  // Get URLs for the FIRST PAGE ONLY to preload
-  // We don't need to wait for page 2, 3, etc.
+  // 1. Initial images (Page 1) -> Block UI until loaded to prevent flash
   const initialImages = useMemo(() => {
       if (!data?.pages[0]) return []
       return data.pages[0]
@@ -49,16 +48,31 @@ function Dashboard() {
         .filter(url => !!url)
   }, [data?.pages])
 
-  const { imagesPreloaded } = useImagePreloader(initialImages)
+  const { imagesPreloaded: initialImagesLoaded } = useImagePreloader(initialImages)
+
+  // 2. All images -> Preload in background for smooth scrolling (don't block UI)
+  const allImages = useMemo(() => {
+      if (!data?.pages) return []
+      return data.pages.flatMap(page => page)
+        .map(item => item.signed_url || item.cover_url || '')
+        .filter(url => !!url)
+  }, [data?.pages])
+
+  // Just call hook to trigger preloading side-effect
+  useImagePreloader(allImages)
 
   // Show loading screen if:
   // 1. React Query is strictly loading the first page (isLoading)
-  // 2. OR if we have data but images haven't finished preloading yet
-  // However, we only want to block UI on the VERY first load or tab switch
-  // If we assume tab switch clears data, then `isLoading` will be true.
-  const showLoadingScreen = isLoading || (!imagesPreloaded && initialImages.length > 0)
+  // 2. OR if we have data (page 1) but its images haven't finished preloading yet
+  // Show loading screen if:
+  // 1. React Query is strictly loading the first page (isLoading)
+  // 2. OR if we have data (page 1) but its images haven't finished preloading yet
+  const showLoadingScreen = isLoading || (!initialImagesLoaded && initialImages.length > 0)
 
-  const [ref, inView] = useInView()
+  // Aggressive prefetching: Trigger next page load when user is within 1000px of the bottom
+  // This is roughly 1-2 viewports, effectively "prefetching" the next page while on the current one.
+  const observerOptions = useMemo(() => ({ rootMargin: '1000px' }), [])
+  const [ref, inView] = useInView(observerOptions)
 
   useEffect(() => {
       if (inView && hasNextPage && !showLoadingScreen) {

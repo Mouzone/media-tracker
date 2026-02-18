@@ -1,11 +1,14 @@
-
-import { useState, useEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
 
 export const useImagePreloader = (urls: string[]) => {
   const [imagesPreloaded, setImagesPreloaded] = useState(false)
   const [imagesLoadedCount, setImagesLoadedCount] = useState(0)
 
-  useEffect(() => {
+  // Use a stringified version of URLs for deep comparison
+  // to avoid re-running effect on every render if array reference changes
+  const urlsString = JSON.stringify(urls)
+
+  useLayoutEffect(() => {
     let isMounted = true
     const uniqueUrls = Array.from(new Set(urls.filter(url => !!url)))
     const total = uniqueUrls.length
@@ -15,6 +18,7 @@ export const useImagePreloader = (urls: string[]) => {
       return
     }
 
+    // Reset only if we actually have new URLs to load
     setImagesPreloaded(false)
     setImagesLoadedCount(0)
 
@@ -50,7 +54,7 @@ export const useImagePreloader = (urls: string[]) => {
     return () => {
         isMounted = false
     }
-  }, [urls]) // Re-run when url list changes
+  }, [urlsString]) // now depends on stringified URLs
 
   return { imagesPreloaded, imagesLoadedCount }
 }
