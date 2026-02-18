@@ -26,6 +26,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [newCoverPath, setNewCoverPath] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
+  const [isTagInputFocused, setIsTagInputFocused] = useState(false)
   
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -419,11 +420,16 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     placeholder={tags.length === 0 ? "Type and enter..." : ""}
                                     value={tagInput}
                                     onChange={(e) => setTagInput(e.target.value)}
+                                    onFocus={() => setIsTagInputFocused(true)}
+                                    onBlur={() => {
+                                        // Delay hiding suggestions to allow clicking them
+                                        setTimeout(() => setIsTagInputFocused(false), 200)
+                                    }}
                                     onKeyDown={handleTagKeyDown}
                                 />
                             </div>
                             {/* Tag Suggestions */}
-                            {suggestedTags.length > 0 && (
+                            {isTagInputFocused && tagInput.trim().length > 0 && suggestedTags.length > 0 && (
                                 <div className="absolute z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
                                     {suggestedTags.map(tag => (
                                         <button

@@ -63,6 +63,24 @@ function BulkUpload() {
     }
   }, [items])
 
+  // Fetch existing tags for autocomplete
+  const [allTags, setAllTags] = useState<string[]>([])
+  useEffect(() => {
+      supabase
+        .from('media_items')
+        .select('tags')
+        .not('tags', 'is', null)
+        .then(({ data }) => {
+            if (data) {
+                const tags = Array.from(new Set(data.flatMap(d => d.tags || []))).sort()
+                setAllTags(tags)
+            }
+        })
+  }, [])
+
+  const [focusedTagInputId, setFocusedTagInputId] = useState<string | null>(null)
+  const [tagInput, setTagInput] = useState('')
+
   // Parsing Logic
   const handleParse = () => {
     if (!inputData.trim()) return
@@ -365,26 +383,64 @@ function BulkUpload() {
                             />
                         </td>
                         <td className="px-4 py-3">
-                            <div className="flex flex-wrap gap-1">
+                                    <div className="flex flex-wrap gap-1">
                                 {item.tags.map(tag => (
                                     <span key={tag} className="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded flex items-center">
                                         {tag}
                                         <button onClick={() => updateItem(item.id, { tags: item.tags.filter(t => t !== tag) })} className="ml-1 hover:text-red-500">×</button>
                                     </span>
                                 ))}
-                                <input 
-                                    className="text-xs bg-transparent outline-none w-20 min-w-[50px] placeholder:text-gray-400"
-                                    placeholder="+Tag"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const val = e.currentTarget.value.trim()
-                                            if (val && !item.tags.includes(val)) {
-                                                updateItem(item.id, { tags: [...item.tags, val] })
-                                                e.currentTarget.value = ''
+                                <div className="relative">
+                                    <input 
+                                        className="text-xs bg-transparent outline-none w-20 min-w-[50px] placeholder:text-gray-400"
+                                        placeholder="+Tag"
+                                        value={item.id === focusedTagInputId ? tagInput : ''}
+                                        onFocus={() => {
+                                            setFocusedTagInputId(item.id)
+                                            setTagInput('')
+                                        }}
+                                        onBlur={() => {
+                                            // Delay to allow clicking suggestions
+                                            setTimeout(() => {
+                                                if (focusedTagInputId === item.id) {
+                                                    setFocusedTagInputId(null)
+                                                    setTagInput('')
+                                                }
+                                            }, 200)
+                                        }}
+                                        onChange={(e) => setTagInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                const val = e.currentTarget.value.trim()
+                                                if (val && !item.tags.includes(val)) {
+                                                    updateItem(item.id, { tags: [...item.tags, val] })
+                                                    setTagInput('')
+                                                }
                                             }
-                                        }
-                                    }}
-                                />
+                                        }}
+                                    />
+                                    {/* Tag Suggestions */}
+                                    {focusedTagInputId === item.id && tagInput.trim().length > 0 && (
+                                        <div className="absolute z-10 bottom-full mb-1 left-0 w-48 max-h-32 overflow-y-auto rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                                            {allTags
+                                                .filter(t => !item.tags.includes(t) && t.toLowerCase().includes(tagInput.toLowerCase()))
+                                                .slice(0, 5)
+                                                .map(tag => (
+                                                <button
+                                                    key={tag}
+                                                    className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 block"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault() // Prevent blur
+                                                        updateItem(item.id, { tags: [...item.tags, tag] })
+                                                        setTagInput('')
+                                                    }}
+                                                >
+                                                    {tag}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </td>
                         <td className="px-4 py-3">
