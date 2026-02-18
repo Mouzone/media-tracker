@@ -1,106 +1,71 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { MediaCard } from '../../components/MediaCard'
 import { MediaModal } from '../../components/MediaModal'
-import { useState, useEffect } from 'react'
+import { LoadingScreen } from '../../components/LoadingScreen'
+import { useState, useEffect, useMemo } from 'react'
 import { MediaItem } from '../../types'
-import { supabase } from '../../utils/supabase'
+import { useMediaItems } from '../../hooks/useMediaItems'
+import { useInView } from '../../hooks/useInView'
+import { useImagePreloader } from '../../hooks/useImagePreloader'
 
 export const Route = createFileRoute('/_layout/')({
   component: Dashboard,
 })
 
 function Dashboard() {
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'movie' | 'tv' | 'book' | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-
-  const fetchItems = async () => {
-      setLoading(true)
-      try {
-          const { data, error } = await supabase.from('media_items').select('*').order('created_at', { ascending: false })
-          
-          if (error || !data || data.length === 0) {
-              console.warn("Using mock data")
-               const mockData: MediaItem[] = [
-                {
-                    id: '1',
-                    user_id: 'mock',
-                    title: 'Inception',
-                    type: 'movie',
-                    cover_url: 'https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg',
-                    date_finished: '2023-11-15',
-                    review: 'Mind bending!',
-                    tags: ['scifi', 'thriller'],
-                    rating: 'like',
-                    created_at: new Date().toISOString()
-                },
-                {
-                    id: '2',
-                    user_id: 'mock',
-                    title: 'Breaking Bad',
-                    type: 'tv',
-                    cover_url: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
-                    date_finished: '2023-10-01',
-                    review: 'Best show ever.',
-                    tags: ['drama', 'crime'],
-                    rating: 'like',
-                    created_at: new Date().toISOString()
-                }
-            ]
-            setMediaItems(mockData)
-          } else {
-              // Resolve signed URLs for private paths (or legacy public URLs)
-              const urlToPathMap: Record<string, string> = {}
-              const pathsToSign: string[] = []
-              const items = data as MediaItem[]
-
-              items.forEach(item => {
-                  if (!item.cover_url) return
-
-                  if (!item.cover_url.startsWith('http')) {
-                      urlToPathMap[item.cover_url] = item.cover_url
-                      pathsToSign.push(item.cover_url)
-                  } else if (item.cover_url.includes('/covers/')) {
-                      // Handle legacy public URLs that are now private
-                      // Format: .../storage/v1/object/public/covers/userId/filename
-                      const parts = item.cover_url.split('/covers/')
-                      if (parts.length > 1) {
-                          const path = parts[1] // "userId/filename"
-                          urlToPathMap[item.cover_url] = path
-                          pathsToSign.push(path)
-                      }
-                  }
-              })
-              
-              if (pathsToSign.length > 0) {
-                  const { getSignedUrls } = await import('../../services/storage')
-                  const signedUrls = await getSignedUrls(pathsToSign)
-                  
-                  const itemsWithSignedUrls = (data as MediaItem[]).map(item => {
-                      if (item.cover_url) {
-                          const path = urlToPathMap[item.cover_url]
-                          if (path && signedUrls[path]) {
-                              return { ...item, signed_url: signedUrls[path] }
-                          }
-                      }
-                      return item
-                  })
-                  setMediaItems(itemsWithSignedUrls)
-              } else {
-                  setMediaItems(data as MediaItem[])
-              }
-          }
-      } catch (err) {
-          console.error("Failed to fetch items:", err)
-      } finally {
-          setLoading(false)
+  
+  // Debounce search query could be added here for better performance
+  
+  const { 
+      data, 
+      fetchNextPage, 
+      hasNextPage, 
+      isFetchingNextPage, 
+      isLoading,
+      isError 
+  } = useMediaItems({
+      filter: {
+          type: activeTab || undefined,
+          search: searchQuery || undefined,
+          sort: 'date'
       }
-  }
+  })
+
+  // Flatten the pages into a single array
+  const mediaItems = useMemo(() => {
+      return data?.pages.flatMap(page => page) || []
+  }, [data])
+
+  // Get URLs for the FIRST PAGE ONLY to preload
+  // We don't need to wait for page 2, 3, etc.
+  const initialImages = useMemo(() => {
+      if (!data?.pages[0]) return []
+      return data.pages[0]
+        .map(item => item.signed_url || item.cover_url || '')
+        .filter(url => !!url)
+  }, [data?.pages])
+
+  const { imagesPreloaded } = useImagePreloader(initialImages)
+
+  // Show loading screen if:
+  // 1. React Query is strictly loading the first page (isLoading)
+  // 2. OR if we have data but images haven't finished preloading yet
+  // However, we only want to block UI on the VERY first load or tab switch
+  // If we assume tab switch clears data, then `isLoading` will be true.
+  const showLoadingScreen = isLoading || (!imagesPreloaded && initialImages.length > 0)
+
+  const [ref, inView] = useInView()
 
   useEffect(() => {
-      fetchItems()
-  }, [])
+      if (inView && hasNextPage && !showLoadingScreen) {
+          fetchNextPage()
+      }
+  }, [inView, hasNextPage, fetchNextPage, showLoadingScreen])
+
 
   const handleCardClick = (item: MediaItem) => {
     setSelectedItem(item)
@@ -112,28 +77,24 @@ function Dashboard() {
     setIsModalOpen(false)
   }
 
-
-  const [activeTab, setActiveTab] = useState<'movie' | 'tv' | 'book' | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-
   const handleTabClick = (type: 'movie' | 'tv' | 'book') => {
     setActiveTab(current => current === type ? null : type)
   }
-
-  const filteredItems = mediaItems.filter(item => {
-    const matchesTab = activeTab ? item.type === activeTab : true
-    const searchLower = searchQuery.toLowerCase()
-    const matchesSearch = item.title.toLowerCase().includes(searchLower) ||
-                          (item.review && item.review.toLowerCase().includes(searchLower)) ||
-                          (item.tags && item.tags.some(tag => tag.toLowerCase().includes(searchLower)))
-    return matchesTab && matchesSearch
-  })
 
   const getTabClass = (type: 'movie' | 'tv' | 'book') => {
     const base = "px-3 py-1.5 rounded-md font-medium transition-colors"
     const active = "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
     const inactive = "text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"
     return `${base} ${activeTab === type ? active : inactive}`
+  }
+
+  // Get all unique tags for the modal autocomplete
+  const allTags = useMemo(() => {
+     return Array.from(new Set(mediaItems.flatMap(item => item.tags || [])))
+  }, [mediaItems])
+
+  if (showLoadingScreen) {
+      return <LoadingScreen />
   }
 
   return (
@@ -169,24 +130,31 @@ function Dashboard() {
          </div>
       </div>
       
-      {loading ? (
-          <p className="text-center py-10">Loading...</p>
-      ) : filteredItems.length === 0 ? (
-          null
+      {isError ? (
+          <p className="text-center py-10 text-red-500">Error loading items</p>
+      ) : mediaItems.length === 0 ? (
+          <p className="text-center py-10">No items found.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {filteredItems.map(item => (
-            <MediaCard key={item.id} item={item} onClick={handleCardClick} />
-            ))}
-        </div>
+        <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                {mediaItems.map(item => (
+                <MediaCard key={item.id} item={item} onClick={handleCardClick} />
+                ))}
+            </div>
+            {/* Loading trigger element */}
+            <div ref={ref} className="h-10 flex justify-center items-center mt-4">
+                {isFetchingNextPage && <span className="text-gray-500">Loading more...</span>}
+            </div>
+        </>
       )}
 
       <MediaModal 
         item={selectedItem} 
         isOpen={isModalOpen} 
         onClose={handleClose}
-        existingTags={Array.from(new Set(mediaItems.flatMap(item => item.tags || [])))}
+        existingTags={allTags}
       />
     </div>
   )
 }
+

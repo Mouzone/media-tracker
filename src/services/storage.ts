@@ -20,9 +20,9 @@ export const uploadCoverImage = async (file: File, userId: string): Promise<{ pa
         .from('covers')
         .createSignedUrl(filePath, 60 * 60 * 24 * 365) // 1 year expiry for immediate display
 
-    if (signError) {
+    if (signError || !signedData) {
         console.error('Error signing URL:', signError)
-        throw signError
+        throw signError || new Error('No data returned from signing URL')
     }
 
     return {
@@ -39,7 +39,7 @@ export const getSignedUrl = async (path: string): Promise<string | null> => {
         .from('covers')
         .createSignedUrl(path, 60 * 60) // 1 hour
 
-    if (error) {
+    if (error || !data) {
         console.error('Error creating signed URL:', error)
         return null
     }
@@ -59,7 +59,7 @@ export const getSignedUrls = async (paths: string[]): Promise<Record<string, str
 
     const result: Record<string, string> = {}
     data.forEach(item => {
-        if (item.signedUrl) {
+        if (item.signedUrl && item.path) {
             result[item.path] = item.signedUrl
         }
     })
