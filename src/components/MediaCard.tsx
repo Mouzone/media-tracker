@@ -1,6 +1,7 @@
 import { MediaItem } from '../types'
 import { motion } from 'framer-motion'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Marquee } from './Marquee'
 
 interface MediaCardProps {
   item: MediaItem
@@ -29,7 +30,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       )}
       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
         <div className="text-white text-sm">
-          <p className="font-bold truncate">{item.title}</p>
+          <Marquee text={item.title} className="font-bold text-sm" />
           <p className="text-xs">
             {item.type === 'tv' && item.seasons 
               ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 

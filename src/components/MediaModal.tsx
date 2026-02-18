@@ -261,7 +261,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     <option value="movie">Movie</option>
                                     <option value="tv">TV Show</option>
                                     <option value="book">Book</option>
-                                    <option value="game">Game</option>
                                 </select>
                             </div>
                              <div>
