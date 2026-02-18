@@ -23,7 +23,6 @@ interface BulkItem {
   cover_path?: string
   date_finished: string
   seasons?: number
-  language: string
   // UI state
   selected?: boolean
   error?: string
@@ -81,7 +80,6 @@ function BulkUpload() {
         rating: null,
         tags: [],
         review: '',
-        language: 'English',
         date_finished: '',
         selected: true
       }
@@ -158,7 +156,6 @@ function BulkUpload() {
         cover_url: item.cover_path || item.cover_url || null,
         date_finished: item.date_finished || null,
         seasons: item.type === 'tv' && item.seasons ? item.seasons : null,
-        language: item.language || 'English',
     }))
 
     const { error } = await supabase.from('media_items').insert(records)
@@ -245,7 +242,6 @@ function BulkUpload() {
                     <th className="px-4 py-3 w-32">Type</th>
                     <th className="px-4 py-3 w-32">Status</th>
                     <th className="px-4 py-3 w-24">Seasons</th>
-                    <th className="px-4 py-3 w-32">Language</th>
                     <th className="px-4 py-3 w-32">Rating</th>
                     <th className="px-4 py-3 w-40">Date Finished</th>
                     <th className="px-4 py-3 min-w-[200px]">Review</th>
@@ -329,17 +325,7 @@ function BulkUpload() {
                                 <span className="text-gray-400 text-xs">-</span>
                             )}
                         </td>
-                        <td className="px-4 py-3">
-                             <select
-                                className="w-24 bg-transparent border rounded p-1 text-xs"
-                                value={item.language}
-                                onChange={(e) => updateItem(item.id, { language: e.target.value })}
-                            >
-                                {['English', 'Spanish', 'French', 'German', 'Japanese', 'Korean', 'Chinese', 'Hindi', 'Italian', 'Portuguese', 'Russian', 'Arabic'].map(lang => (
-                                    <option key={lang} value={lang}>{lang}</option>
-                                ))}
-                            </select>
-                        </td>
+
                         <td className="px-4 py-3">
                             <div className="flex gap-1">
                                 <button 

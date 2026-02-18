@@ -18,7 +18,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [type, setType] = useState<MediaType>('movie')
   const [status, setStatus] = useState<StatusType>('finished')
   const [seasons, setSeasons] = useState<number | ''>('')
-  const [language, setLanguage] = useState('English')
   const [title, setTitle] = useState('')
   const [review, setReview] = useState('')
   const [dateFinished, setDateFinished] = useState('')
@@ -40,7 +39,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setType(item.type)
         setStatus(item.status || 'finished')
         setSeasons(item.seasons || '')
-        setLanguage(item.language || 'English')
         setTitle(item.title)
         setReview(item.review || '')
         setDateFinished(item.date_finished || '')
@@ -67,7 +65,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setType('movie')
         setStatus('finished')
         setSeasons('')
-        setLanguage('English')
         setTitle('')
         setReview('')
         setDateFinished(new Date().toISOString().split('T')[0]) // Default to today
@@ -125,7 +122,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         type,
         status,
         seasons: seasons ? Number(seasons) : null,
-        language,
         cover_url: newCoverPath || (item?.cover_url || null),
         date_finished: dateFinished || null,
         review,
@@ -296,19 +292,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                             </div>
                         )}
 
-                        {/* Language Selection */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Language</label>
-                            <select
-                                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
-                            >
-                                {['English', 'Spanish', 'French', 'German', 'Japanese', 'Korean', 'Chinese', 'Hindi', 'Italian', 'Portuguese', 'Russian', 'Arabic'].map(lang => (
-                                    <option key={lang} value={lang}>{lang}</option>
-                                ))}
-                            </select>
-                        </div>
+
 
                         {/* Title with Search */}
                         <div className="relative">

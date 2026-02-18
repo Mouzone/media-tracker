@@ -8,7 +8,6 @@ export interface MediaItem {
   type: MediaType
   status?: StatusType
   seasons?: number | null
-  language?: string | null
   cover_url: string | null
   date_finished: string | null
   review: string | null
