@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { MediaCard } from '../../components/MediaCard'
 import { MediaModal } from '../../components/MediaModal'
-import { LoadingScreen } from '../../components/LoadingScreen'
+import { SkeletonGrid } from '../../components/SkeletonLoader'
 import { useState, useEffect, useMemo } from 'react'
 import { MediaItem } from '../../types'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { useInView } from '../../hooks/useInView'
-import { useImagePreloader } from '../../hooks/useImagePreloader'
+import { useSmartPreloader } from '../../hooks/useSmartPreloader'
 
 export const Route = createFileRoute('/_layout/')({
   component: Dashboard,
@@ -40,45 +40,23 @@ function Dashboard() {
       return data?.pages.flatMap(page => page) || []
   }, [data])
 
-  // 1. Initial images (Page 1) -> Block UI until loaded to prevent flash
-  const initialImages = useMemo(() => {
-      if (!data?.pages[0]) return []
-      return data.pages[0]
-        .map(item => item.signed_url || item.cover_url || '')
-        .filter(url => !!url)
-  }, [data?.pages])
+  // Use the new smart preloader hook
+  // It handles all the logic for "blocking" page 1 vs "background" preloading
+  const { shouldShowSkeleton } = useSmartPreloader({ data, isLoading })
 
-  const { imagesPreloaded: initialImagesLoaded } = useImagePreloader(initialImages)
-
-  // 2. All images -> Preload in background for smooth scrolling (don't block UI)
-  const allImages = useMemo(() => {
-      if (!data?.pages) return []
-      return data.pages.flatMap(page => page)
-        .map(item => item.signed_url || item.cover_url || '')
-        .filter(url => !!url)
-  }, [data?.pages])
-
-  // Just call hook to trigger preloading side-effect
-  useImagePreloader(allImages)
-
-  // Show loading screen if:
-  // 1. React Query is strictly loading the first page (isLoading)
-  // 2. OR if we have data (page 1) but its images haven't finished preloading yet
-  // Show loading screen if:
-  // 1. React Query is strictly loading the first page (isLoading)
-  // 2. OR if we have data (page 1) but its images haven't finished preloading yet
-  const showLoadingScreen = isLoading || (!initialImagesLoaded && initialImages.length > 0)
-
-  // Aggressive prefetching: Trigger next page load when user is within 1000px of the bottom
-  // This is roughly 1-2 viewports, effectively "prefetching" the next page while on the current one.
-  const observerOptions = useMemo(() => ({ rootMargin: '1000px' }), [])
+  // Aggressive prefetching: Trigger next page load when user is within 4000px of the bottom
+  // This is roughly 4-5 viewports, effectively "prefetching" the next page immediately.
+  const observerOptions = useMemo(() => ({ rootMargin: '4000px' }), [])
   const [ref, inView] = useInView(observerOptions)
 
   useEffect(() => {
-      if (inView && hasNextPage && !showLoadingScreen) {
+      // We need to check !isFetchingNextPage to avoid spamming, but we MUST include it in dependencies
+      // so that when a fetch FINISHES (isFetchingNextPage goes from true -> false), we re-evaluate
+      // and fetch the NEXT page if we are still in view (which we consistently are with 4000px margin).
+      if (inView && hasNextPage && !shouldShowSkeleton && !isFetchingNextPage) {
           fetchNextPage()
       }
-  }, [inView, hasNextPage, fetchNextPage, showLoadingScreen])
+  }, [inView, hasNextPage, fetchNextPage, shouldShowSkeleton, isFetchingNextPage])
 
 
   const handleCardClick = (item: MediaItem) => {
@@ -106,10 +84,6 @@ function Dashboard() {
   const allTags = useMemo(() => {
      return Array.from(new Set(mediaItems.flatMap(item => item.tags || [])))
   }, [mediaItems])
-
-  if (showLoadingScreen) {
-      return <LoadingScreen />
-  }
 
   return (
     <div>
@@ -146,6 +120,8 @@ function Dashboard() {
       
       {isError ? (
           <p className="text-center py-10 text-red-500">Error loading items</p>
+      ) : shouldShowSkeleton ? (
+          <SkeletonGrid count={20} />
       ) : mediaItems.length === 0 ? (
           <p className="text-center py-10">No items found.</p>
       ) : (

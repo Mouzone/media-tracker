@@ -8,7 +8,11 @@ interface MediaCardProps {
   onClick: (item: MediaItem) => void
 }
 
+import { useState } from 'react'
+
 export function MediaCard({ item, onClick }: MediaCardProps) {
+  const [isLoaded, setIsLoaded] = useState(false)
+
   return (
     <motion.div 
       layoutId={`card-${item.id}`}
@@ -17,12 +21,19 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       whileHover={{ scale: 1.02 }}
     >
       {item.signed_url || item.cover_url ? (
-        <img 
-          src={item.signed_url || item.cover_url || ''} 
-          alt={item.title} 
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+        <div className="relative w-full h-full bg-gray-200 dark:bg-gray-800">
+           {/* Skeleton background while loading */}
+           {!isLoaded && (
+               <div className="absolute inset-0 animate-pulse bg-gray-300 dark:bg-gray-700" />
+           )}
+           <img 
+             src={item.signed_url || item.cover_url || ''} 
+             alt={item.title} 
+             className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+             loading="lazy"
+             onLoad={() => setIsLoaded(true)}
+           />
+        </div>
       ) : (
         <div className="flex items-center justify-center h-full text-center p-2 bg-gray-200 dark:bg-gray-800">
           <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">{item.title}</span>
