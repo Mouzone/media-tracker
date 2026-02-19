@@ -5,7 +5,7 @@ import { InfiniteData } from '@tanstack/react-query'
 import { MediaItem } from '../types'
 
 interface UseSmartPreloaderProps {
-    data: InfiniteData<MediaItem[]> | undefined
+    data: InfiniteData<MediaItem[], unknown> | undefined
     isLoading: boolean
 }
 

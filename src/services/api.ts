@@ -18,6 +18,8 @@ export interface GetMediaItemsOptions {
     type?: 'movie' | 'tv' | 'book'
     sort?: 'date' | 'title' | 'rating'
     search?: string
+    tags?: string[]
+    status?: 'finished' | 'dropped' | 'all'
   }
 }
 
@@ -32,6 +34,17 @@ export const getMediaItems = async ({ page, limit, filter }: GetMediaItemsOption
 
   if (filter?.type) {
     query = query.eq('type', filter.type)
+  }
+
+  if (filter?.status && filter.status !== 'all') {
+    query = query.eq('status', filter.status)
+  }
+
+  if (filter?.tags && filter.tags.length > 0) {
+    // .contains means the row must contain ALL the tags in the filter array
+    // .overlaps means the row must contain ANY of the tags in the filter array
+    // Valid arguments for overlaps: (column, array)
+    query = query.overlaps('tags', filter.tags) 
   }
 
   if (filter?.search) {

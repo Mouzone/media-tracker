@@ -8,6 +8,8 @@ import { useMediaItems } from '../../hooks/useMediaItems'
 import { useInView } from '../../hooks/useInView'
 import { useSmartPreloader } from '../../hooks/useSmartPreloader'
 
+import { FilterBar } from '../../components/FilterBar'
+
 export const Route = createFileRoute('/_layout/')({
   component: Dashboard,
 })
@@ -18,6 +20,11 @@ function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   
+  // Filter & Sort State
+  const [filterStatus, setFilterStatus] = useState<'finished' | 'dropped' | 'all'>('all')
+  const [sortBy, setSortBy] = useState<'date' | 'title' | 'rating'>('date')
+  const [filterTags, setFilterTags] = useState<string[]>([])
+
   // Debounce search query could be added here for better performance
   
   const { 
@@ -31,7 +38,9 @@ function Dashboard() {
       filter: {
           type: activeTab || undefined,
           search: searchQuery || undefined,
-          sort: 'date'
+          sort: sortBy,
+          status: filterStatus === 'all' ? undefined : filterStatus,
+          tags: filterTags,
       }
   })
 
@@ -80,9 +89,11 @@ function Dashboard() {
     return `${base} ${activeTab === type ? active : inactive}`
   }
 
-  // Get all unique tags for the modal autocomplete
+  // Get all unique tags for the modal autocomplete and filter bar
+  // Ideally this should come from a separate query or be aggregated from all loaded data
+  // For now, deriving from loaded items is a good start, though imperfect for global filtering
   const allTags = useMemo(() => {
-     return Array.from(new Set(mediaItems.flatMap(item => item.tags || [])))
+     return Array.from(new Set(mediaItems.flatMap(item => item.tags || []))).sort()
   }, [mediaItems])
 
   return (
@@ -98,8 +109,8 @@ function Dashboard() {
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
          </div>
          <div className="flex gap-2">
@@ -117,6 +128,16 @@ function Dashboard() {
             </button>
          </div>
       </div>
+
+      <FilterBar 
+        status={filterStatus}
+        setStatus={setFilterStatus}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        selectedTags={filterTags}
+        setSelectedTags={setFilterTags}
+        availableTags={allTags}
+      />
       
       {isError ? (
           <p className="text-center py-10 text-red-500">Error loading items</p>
