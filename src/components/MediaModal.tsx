@@ -1,5 +1,6 @@
 import { Dialog, Transition, Combobox } from '@headlessui/react'
 import { Fragment, useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { MediaItem, MediaType, StatusType } from '../types'
 import { searchMedia, SearchResult } from '../services/api'
 import { uploadCoverImage, validateImageResponse } from '../services/storage'
@@ -27,6 +28,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const [isTagInputFocused, setIsTagInputFocused] = useState(false)
+  const queryClient = useQueryClient()
   
   const [isSearching, setIsSearching] = useState(false)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -135,7 +137,8 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     setIsLoading(false)
     if (!error) {
         onClose()
-        window.location.reload() // Simple refresh to show new data
+        // Invalidate queries to refresh the list without full reload
+        queryClient.invalidateQueries({ queryKey: ['mediaItems'] })
     } else {
         console.error("Error saving:", error)
         alert("Failed to save item")
