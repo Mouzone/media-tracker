@@ -17,6 +17,9 @@ export default defineConfig({
         short_name: 'MediaTracker',
         description: 'Track your movies, TV shows, and books.',
         theme_color: '#ffffff',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
         icons: [
           {
             src: 'icons/icon-192x192.png',
@@ -27,6 +30,12 @@ export default defineConfig({
             src: 'icons/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png'
+          },
+          {
+            src: 'icons/icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
