@@ -165,7 +165,7 @@ export function FilterBar({
       <div className="flex-1">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter by Tags</label>
         <div className="w-full">
-            <Combobox value={selectedTags} onChange={(tags: string[]) => { /* handled via individual selection but typed weirdly by headlessui */ }} multiple>
+            <Combobox value={selectedTags} onChange={setSelectedTags} multiple>
             <div className="relative mt-1">
               <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                 <div className="flex flex-wrap gap-1 p-1">
@@ -180,16 +180,8 @@ export function FilterBar({
                     <Combobox.Input
                     className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 dark:text-gray-100 bg-transparent focus:ring-0"
                     onChange={(event) => setTagQuery(event.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && tagQuery) {
-                             e.preventDefault()
-                             // Only add if it's a new custom tag, otherwise let Combobox handle the selection
-                             if (!filteredTags.includes(tagQuery)) {
-                                 addTag(tagQuery)
-                             }
-                        }
-                    }}
                     placeholder={selectedTags.length === 0 ? "Select tags..." : ""}
+                    displayValue={() => tagQuery} 
                     value={tagQuery}
                     />
                 </div>
@@ -204,11 +196,10 @@ export function FilterBar({
                 <Combobox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
                   {filteredTags.length === 0 && tagQuery !== '' ? (
                     <Combobox.Option
-                        className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300"
+                        className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300 ui-active:bg-indigo-100 ui-active:text-indigo-900"
                         value={tagQuery}
-                        onClick={() => addTag(tagQuery)}
                     >
-                      "Create/Filter "{tagQuery}"
+                      Create "{tagQuery}"
                     </Combobox.Option>
                   ) : (
                     filteredTags.map((tag) => (
@@ -220,7 +211,6 @@ export function FilterBar({
                           }`
                         }
                         value={tag}
-                        onClick={() => addTag(tag)}
                       >
                         {({ selected, active }) => (
                           <>

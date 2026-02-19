@@ -1,4 +1,4 @@
-import { Dialog, Transition } from '@headlessui/react'
+import { Dialog, Transition, Combobox } from '@headlessui/react'
 import { Fragment, useState, useEffect } from 'react'
 import { MediaItem, MediaType, StatusType } from '../types'
 import { searchMedia, SearchResult } from '../services/api'
@@ -86,21 +86,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const suggestedTags = existingTags
     .filter(tag => !tags.includes(tag) && tag.toLowerCase().includes(tagInput.toLowerCase()))
     .slice(0, 5)
-
-  const removeTag = (tagToRemove: string) => {
-      setTags(tags.filter(tag => tag !== tagToRemove))
-  }
-
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ',') {
-          e.preventDefault()
-          const newTag = tagInput.trim()
-          if (newTag && !tags.includes(newTag)) {
-              setTags([...tags, newTag])
-              setTagInput('')
-          }
-      }
-  }
 
   const handleResultSelect = (result: SearchResult) => {
       setTitle(result.title)
@@ -408,46 +393,97 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                              </div>
                         </div>
 
-                         {/* Tags */}
-                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
-                            <div className="flex flex-wrap gap-2 p-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 min-h-[42px]">
-                                {tags.map(tag => (
-                                    <span key={tag} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                                        {tag}
-                                        <button onClick={() => removeTag(tag)} className="hover:text-blue-600 dark:hover:text-blue-300"><X className="w-3 h-3" /></button>
-                                    </span>
-                                ))}
-                                <input 
-                                    className="flex-1 bg-transparent text-sm min-w-[60px] outline-none"
-                                    placeholder={tags.length === 0 ? "Type and enter..." : ""}
-                                    value={tagInput}
-                                    onChange={(e) => setTagInput(e.target.value)}
-                                    onFocus={() => setIsTagInputFocused(true)}
-                                    onBlur={() => {
-                                        // Delay hiding suggestions to allow clicking them
-                                        setTimeout(() => setIsTagInputFocused(false), 200)
-                                    }}
-                                    onKeyDown={handleTagKeyDown}
-                                />
-                            </div>
-                            {/* Tag Suggestions */}
-                            {isTagInputFocused && tagInput.trim().length > 0 && suggestedTags.length > 0 && (
-                                <div className="absolute z-10 mt-1 max-h-32 w-full overflow-y-auto rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
-                                    {suggestedTags.map(tag => (
-                                        <button
-                                            key={tag}
-                                            className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            onClick={() => {
-                                                setTags([...tags, tag])
-                                                setTagInput('')
-                                            }}
+                        {/* Tags */}
+                        <div>
+                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                             <div className="w-full">
+                                <Combobox value={tags} onChange={setTags} multiple>
+                                    <div className="relative mt-1">
+                                        <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-left shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 sm:text-sm">
+                                            <div className="flex flex-wrap gap-2 p-2 min-h-[42px]">
+                                                {tags.map(tag => (
+                                                    <span key={tag} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                                        {tag}
+                                                        <button 
+                                                            onClick={(e) => { 
+                                                                e.stopPropagation()
+                                                                setTags(tags.filter(t => t !== tag))
+                                                            }} 
+                                                            className="hover:text-blue-600 dark:hover:text-blue-300"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                                <Combobox.Input
+                                                    className="flex-1 bg-transparent text-sm min-w-[60px] outline-none border-none p-0 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                                                    placeholder={tags.length === 0 ? "Type and enter..." : ""}
+                                                    onChange={(event) => setTagInput(event.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && tagInput) {
+                                                            // Only add if it's a new custom tag, otherwise let Combobox handle the selection
+                                                             const filtered = existingTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()))
+                                                             if (!filtered.includes(tagInput) && !tags.includes(tagInput)) {
+                                                                 e.preventDefault()
+                                                                 setTags([...tags, tagInput])
+                                                                 setTagInput('')
+                                                             }
+                                                        }
+                                                        if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) {
+                                                            setTags(tags.slice(0, -1))
+                                                        }
+                                                    }}
+                                                    displayValue={() => tagInput}
+                                                    value={tagInput}
+                                                />
+                                            </div>
+                                        </div>
+                                        <Transition
+                                            as={Fragment}
+                                            leave="transition ease-in duration-100"
+                                            leaveFrom="opacity-100"
+                                            leaveTo="opacity-0"
+                                            afterLeave={() => setTagInput('')}
                                         >
-                                            {tag}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                                            <Combobox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                                                {suggestedTags.length === 0 && tagInput !== '' ? (
+                                                    <Combobox.Option
+                                                        className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300 ui-active:bg-blue-100 dark:ui-active:bg-blue-900 ui-active:text-blue-900 dark:ui-active:text-blue-100"
+                                                        value={tagInput}
+                                                    >
+                                                        Create "{tagInput}"
+                                                    </Combobox.Option>
+                                                ) : (
+                                                    suggestedTags.map((tag) => (
+                                                        <Combobox.Option
+                                                            key={tag}
+                                                            className={({ active }) =>
+                                                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                                                    active ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-gray-100'
+                                                                }`
+                                                            }
+                                                            value={tag}
+                                                        >
+                                                            {({ selected, active }) => (
+                                                                <>
+                                                                    <span className={`block truncate ${tags.includes(tag) ? 'font-medium' : 'font-normal'}`}>
+                                                                        {tag}
+                                                                    </span>
+                                                                    {tags.includes(tag) ? (
+                                                                        <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-blue-600' : 'text-blue-600'}`}>
+                                                                            <CheckCircle className="h-5 w-5" aria-hidden="true" />
+                                                                        </span>
+                                                                    ) : null}
+                                                                </>
+                                                            )}
+                                                        </Combobox.Option>
+                                                    ))
+                                                )}
+                                            </Combobox.Options>
+                                        </Transition>
+                                    </div>
+                                </Combobox>
+                             </div>
                         </div>
 
                         {/* Review */}
