@@ -51,8 +51,8 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
         <div className="text-gray-900 text-sm w-full">
           <Marquee text={item.title} className="font-bold text-sm tracking-tight" />
           <p className="text-xs">
-            {item.type === 'tv' && item.seasons 
-              ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 
+            {item.type === 'tv' 
+              ? (item.seasons ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` : 'TV')
               : <span className="capitalize">{item.type}</span>} 
             {' • '}
             {item.rating === 'like' && <ThumbsUp className="w-4 h-4 inline text-green-500" />}

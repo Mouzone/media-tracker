@@ -146,36 +146,36 @@ function Dashboard() {
       </div>
 
       {/* Floating Action Buttons */}
-      <div className="fixed bottom-8 right-8 z-50 flex flex-col items-center gap-3">
+      <div className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-center gap-3 sm:gap-4">
         {/* Toggle Search/Filter Panel */}
         <button 
             id="search-toggle-btn"
             onClick={() => setIsSearchPanelOpen(!isSearchPanelOpen)}
-            className={`flex items-center justify-center w-10 h-10 rounded-full shadow-md transition-all duration-300 ${isSearchPanelOpen ? 'bg-gray-100 text-gray-900 scale-110 border-gray-300' : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white hover:scale-110 active:scale-95 border border-gray-200/60'}`}
+            className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md transition-all duration-300 ${isSearchPanelOpen ? 'bg-gray-100 text-gray-900 scale-110 border-gray-300' : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white hover:scale-110 active:scale-95 border border-gray-200/60'}`}
             aria-label="Toggle Search and Filters"
             title="Search & Filter"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         </button>
 
         {/* Bulk Upload Button */}
         <Link 
             to="/bulk-upload"
-            className="flex items-center justify-center w-10 h-10 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white rounded-full shadow-md hover:scale-110 active:scale-95 border border-gray-200/60 transition-all duration-300"
+            className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white/90 backdrop-blur-sm text-gray-700 hover:text-gray-900 hover:bg-white rounded-full shadow-md hover:scale-110 active:scale-95 border border-gray-200/60 transition-all duration-300"
             aria-label="Bulk Add"
             title="Bulk Add"
         >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
         </Link>
 
         {/* Create Media Button */}
         <button 
             onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-            className="flex items-center justify-center w-10 h-10 bg-white text-gray-900 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 border border-gray-200 transition-all duration-300 group"
+            className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white text-gray-900 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 border border-gray-200 transition-all duration-300 group"
             aria-label="Add new item"
             title="Add Single Item"
         >
-            <svg className="w-5 h-5 transition-transform group-hover:rotate-90 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
+            <svg className="w-6 h-6 transition-transform group-hover:rotate-90 duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" /></svg>
         </button>
       </div>
 
