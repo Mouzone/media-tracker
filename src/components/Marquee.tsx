@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import clsx from 'clsx'
@@ -8,9 +7,10 @@ interface MarqueeProps {
   className?: string
   duration?: number
   delay?: number
+  isHovered?: boolean
 }
 
-export function Marquee({ text, className, duration = 10, delay = 1 }: MarqueeProps) {
+export function Marquee({ text, className, duration = 10, delay = 1, isHovered = true }: MarqueeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const [isOverflowing, setIsOverflowing] = useState(false)
@@ -27,7 +27,8 @@ export function Marquee({ text, className, duration = 10, delay = 1 }: MarqueePr
     return () => window.removeEventListener('resize', checkOverflow)
   }, [text])
 
-  if (!isOverflowing) {
+  // If it's not overflowing, OR it is overflowing but we aren't hovering, just show the static text
+  if (!isOverflowing || !isHovered) {
     return (
       <div ref={containerRef} className={clsx("truncate", className)}>
         <span ref={textRef}>{text}</span>

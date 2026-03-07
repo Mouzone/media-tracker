@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import { MediaItem } from '../types'
 import { motion } from 'framer-motion'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
@@ -8,16 +9,17 @@ interface MediaCardProps {
   onClick: (item: MediaItem) => void
 }
 
-import { useState } from 'react'
-
-export function MediaCard({ item, onClick }: MediaCardProps) {
+export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaCardProps) {
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
     <motion.div 
       layoutId={`card-${item.id}`}
       className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-100 m-0 p-0"
       onClick={() => onClick(item)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {item.signed_url || item.cover_url ? (
         <div className="relative w-full h-full bg-gray-100">
@@ -40,7 +42,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       )}
       <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-white via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
         <div className="text-gray-900 text-sm w-full">
-          <Marquee text={item.title} className="font-bold text-sm tracking-tight" />
+          <Marquee text={item.title} className="font-bold text-sm tracking-tight" isHovered={isHovered} />
           <p className="text-xs">
             {item.type === 'tv' && item.seasons 
               ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 
@@ -54,4 +56,4 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
       </div>
     </motion.div>
   )
-}
+})

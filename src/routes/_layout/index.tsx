@@ -2,7 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { MediaCard } from '../../components/MediaCard'
 import { MediaModal } from '../../components/MediaModal'
 import { SkeletonGrid } from '../../components/SkeletonLoader'
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { MediaItem } from '../../types'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { useInView } from '../../hooks/useInView'
@@ -73,10 +73,10 @@ function Dashboard() {
   }, [inView, hasNextPage, fetchNextPage, shouldShowSkeleton, isFetchingNextPage])
 
 
-  const handleCardClick = (item: MediaItem) => {
+  const handleCardClick = React.useCallback((item: MediaItem) => {
     setSelectedItem(item)
     setIsModalOpen(true)
-  }
+  }, [])
 
   const handleClose = () => {
     setSelectedItem(null)
