@@ -30,8 +30,7 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
            <img 
              src={item.signed_url || item.cover_url || ''} 
              alt={item.title} 
-             className={`w-full h-full object-cover transition-all duration-300 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-             loading="lazy"
+             className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
              onLoad={() => setIsLoaded(true)}
            />
         </div>
