@@ -28,7 +28,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
            <img 
              src={item.signed_url || item.cover_url || ''} 
              alt={item.title} 
-             className={`w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 ${isLoaded ? 'opacity-100 blur-0' : 'opacity-0 blur-md'}`}
+             className={`w-full h-full object-cover transition-all duration-300 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
              loading="lazy"
              onLoad={() => setIsLoaded(true)}
            />
