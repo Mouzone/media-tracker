@@ -169,7 +169,7 @@ function Dashboard() {
         {/* Create Media Button */}
         <button 
             onClick={() => { setSelectedItem(null); setIsModalOpen(true); }}
-            className="flex items-center justify-center w-12 h-12 bg-white text-gray-900 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 border border-gray-200 transition-all duration-300 group mt-1"
+            className="flex items-center justify-center w-10 h-10 bg-white text-gray-900 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 active:scale-95 border border-gray-200 transition-all duration-300 group"
             aria-label="Add new item"
             title="Add Single Item"
         >
