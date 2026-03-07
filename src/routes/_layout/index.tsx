@@ -7,6 +7,7 @@ import { MediaItem } from '../../types'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { useInView } from '../../hooks/useInView'
 import { useSmartPreloader } from '../../hooks/useSmartPreloader'
+import { useDebounce } from '../../hooks/useDebounce'
 
 import { FilterBar } from '../../components/FilterBar'
 
@@ -28,7 +29,8 @@ function Dashboard() {
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'rating'>('date')
   const [filterTags, setFilterTags] = useState<string[]>([])
 
-  // Debounce search query could be added here for better performance
+  // Debounce search query to prevent excessive API calls while typing
+  const debouncedSearchQuery = useDebounce(searchQuery, 300)
   
   const { 
       data, 
@@ -40,7 +42,7 @@ function Dashboard() {
   } = useMediaItems({
       filter: {
           type: activeTab || undefined,
-          search: searchQuery || undefined,
+          search: debouncedSearchQuery || undefined,
           sort: sortBy,
           status: filterStatus === 'all' ? undefined : filterStatus,
           tags: filterTags,

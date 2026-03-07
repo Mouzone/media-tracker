@@ -236,7 +236,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                     </div>
 
                     {/* Right Column: Details */}
-                    <div className="space-y-4 flex flex-col justify-center">
+                    <div className="space-y-4 flex flex-col justify-center min-w-0">
                         {/* Title */}
                         <div>
                             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Title</label>
@@ -297,7 +297,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                 <div className="relative">
                                     <input 
                                         type="date" 
-                                        className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
+                                        className="block w-full min-w-0 max-w-[100%] rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 pr-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
                                         value={dateFinished}
                                         onChange={(e) => setDateFinished(e.target.value)}
                                     />
