@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { useState, useRef, useEffect } from 'react'
 import { MediaType, StatusType } from '../../types'
 import { Save, Trash2, Loader2, Image as ImageIcon, ThumbsUp, ThumbsDown } from 'lucide-react'
@@ -31,6 +32,7 @@ interface BulkItem {
 
 function BulkUpload() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [inputData, setInputData] = useState('')
   
   // Initialize from localStorage if available
@@ -186,6 +188,8 @@ function BulkUpload() {
     } else {
         const uploadedIds = new Set(selectedItems.map(i => i.id))
         setItems(prev => prev.filter(i => !uploadedIds.has(i.id)))
+        
+        queryClient.invalidateQueries({ queryKey: ['mediaItems'] })
         
         if (window.confirm(`Successfully added ${selectedItems.length} items! Go to dashboard?`)) {
             router.navigate({ to: '/' })

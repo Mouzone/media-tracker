@@ -103,6 +103,8 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     }
 
     let error
+    let insertedItem = null
+
     if (item) {
         const { error: updateError } = await supabase
             .from('media_items')
@@ -110,15 +112,33 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
             .eq('id', item.id)
         error = updateError
     } else {
-        const { error: insertError } = await supabase
+        const { data, error: insertError } = await supabase
             .from('media_items')
             .insert(itemData)
+            .select()
+            .single()
         error = insertError
+        if (data) insertedItem = data
     }
 
     setIsLoading(false)
     if (!error) {
         onClose()
+        
+        if (insertedItem) {
+            // Optimistically add to the beginning of the cached list
+            queryClient.setQueriesData({ queryKey: ['mediaItems'] }, (oldData: any) => {
+                if (!oldData || !oldData.pages) return oldData;
+                const newPages = [...oldData.pages];
+                if (newPages.length > 0) {
+                    newPages[0] = [insertedItem, ...newPages[0]];
+                } else {
+                    newPages.push([insertedItem]);
+                }
+                return { ...oldData, pages: newPages };
+            });
+        }
+        
         // Invalidate queries to refresh the list without full reload
         queryClient.invalidateQueries({ queryKey: ['mediaItems'] })
     } else {
