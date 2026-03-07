@@ -12,7 +12,7 @@ interface MediaCardProps {
 
 export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaCardProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [ref, inView] = useInView({ rootMargin: '200px' })
+  const [ref, inView] = useInView({ rootMargin: '600px' })
   const [hasEnteredView, setHasEnteredView] = useState(false)
 
   useEffect(() => {
@@ -37,8 +37,7 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
              <img 
                src={item.signed_url || item.cover_url || ''} 
                alt={item.title} 
-               decoding="async"
-               className={`w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+               className={`w-full h-full object-cover transition duration-500 ease-out group-hover:scale-105 transform-gpu ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
                onLoad={() => setIsLoaded(true)}
              />
            )}
