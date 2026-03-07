@@ -16,26 +16,28 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
   return (
     <motion.div 
       layoutId={`card-${item.id}`}
-      className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-100 m-0 p-0"
+      className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-200 m-0 p-0"
       onClick={() => onClick(item)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {item.signed_url || item.cover_url ? (
-        <div className="relative w-full h-full bg-gray-100">
+        <div className="relative w-full h-full bg-gray-200">
            {/* Skeleton background while loading */}
            {!isLoaded && (
-               <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+               <div className="absolute inset-0 bg-gray-300 animate-pulse" />
            )}
            <img 
              src={item.signed_url || item.cover_url || ''} 
              alt={item.title} 
-             className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+             loading="lazy"
+             decoding="async"
+             className={`w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
              onLoad={() => setIsLoaded(true)}
            />
         </div>
       ) : (
-        <div className="flex items-center justify-center h-full text-center p-2 bg-gray-100">
+        <div className="flex items-center justify-center h-full text-center p-2 bg-gray-200">
           <span className="text-sm font-semibold text-gray-400">{item.title}</span>
         </div>
       )}
