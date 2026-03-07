@@ -12,7 +12,6 @@ interface MediaCardProps {
 
 export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaCardProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
   const [ref, inView] = useInView({ rootMargin: '200px' })
   const [hasEnteredView, setHasEnteredView] = useState(false)
 
@@ -27,8 +26,6 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
       layoutId={`card-${item.id}`}
       className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-200 m-0 p-0"
       onClick={() => onClick(item)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       {item.signed_url || item.cover_url ? (
         <div ref={ref} className="relative w-full h-full bg-gray-200">
@@ -51,9 +48,9 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
           <span className="text-sm font-semibold text-gray-400">{item.title}</span>
         </div>
       )}
-      <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-white via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+      <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-white via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-end p-3 pointer-events-none">
         <div className="text-gray-900 text-sm w-full">
-          <Marquee text={item.title} className="font-bold text-sm tracking-tight" isHovered={isHovered} />
+          <Marquee text={item.title} className="font-bold text-sm tracking-tight" />
           <p className="text-xs">
             {item.type === 'tv' && item.seasons 
               ? `TV (${item.seasons} season${item.seasons === 1 ? '' : 's'})` 

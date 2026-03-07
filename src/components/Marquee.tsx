@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { motion } from 'framer-motion'
 import clsx from 'clsx'
 
 interface MarqueeProps {
@@ -10,7 +9,7 @@ interface MarqueeProps {
   isHovered?: boolean
 }
 
-export function Marquee({ text, className, duration = 10, delay = 1, isHovered = true }: MarqueeProps) {
+export function Marquee({ text, className, duration, delay = 0 }: MarqueeProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const [isOverflowing, setIsOverflowing] = useState(false)
@@ -27,8 +26,7 @@ export function Marquee({ text, className, duration = 10, delay = 1, isHovered =
     return () => window.removeEventListener('resize', checkOverflow)
   }, [text])
 
-  // If it's not overflowing, OR it is overflowing but we aren't hovering, just show the static text
-  if (!isOverflowing || !isHovered) {
+  if (!isOverflowing) {
     return (
       <div ref={containerRef} className={clsx("truncate", className)}>
         <span ref={textRef}>{text}</span>
@@ -37,20 +35,17 @@ export function Marquee({ text, className, duration = 10, delay = 1, isHovered =
   }
 
   return (
-    <div ref={containerRef} className={clsx("overflow-hidden flex mask-gradient", className)}>
-      <motion.div
-        className="flex whitespace-nowrap"
-        animate={{ x: "-50%" }}
-        transition={{ 
-            repeat: Infinity, 
-            ease: "linear", 
-            duration: duration || Math.max(text.length * 0.2, 5), // dynamic duration based on length if not provided
-            delay: delay
-        }}
+    <div ref={containerRef} className={clsx("overflow-hidden flex mask-gradient group/marquee", className)}>
+      <div
+        className="flex whitespace-nowrap animate-marquee [animation-play-state:paused] group-hover:[animation-play-state:running] group-hover/marquee:[animation-play-state:running]"
+        style={{ 
+          '--marquee-duration': `${duration || Math.max(text.length * 0.2, 5)}s`,
+          animationDelay: `${delay}s`
+        } as React.CSSProperties}
       >
         <span className="mr-4">{text}</span>
         <span className="mr-4">{text}</span>
-      </motion.div>
+      </div>
     </div>
   )
 }
