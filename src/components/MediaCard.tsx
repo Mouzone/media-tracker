@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { MediaItem } from '../types'
 import { motion } from 'framer-motion'
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { Marquee } from './Marquee'
+import { useInView } from '../hooks/useInView'
 
 interface MediaCardProps {
   item: MediaItem
@@ -12,6 +13,14 @@ interface MediaCardProps {
 export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaCardProps) {
   const [isLoaded, setIsLoaded] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
+  const [ref, inView] = useInView({ rootMargin: '200px' })
+  const [hasEnteredView, setHasEnteredView] = useState(false)
+
+  useEffect(() => {
+    if (inView && !hasEnteredView) {
+      setHasEnteredView(true)
+    }
+  }, [inView, hasEnteredView])
 
   return (
     <motion.div 
@@ -22,19 +31,20 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
       onMouseLeave={() => setIsHovered(false)}
     >
       {item.signed_url || item.cover_url ? (
-        <div className="relative w-full h-full bg-gray-200">
+        <div ref={ref} className="relative w-full h-full bg-gray-200">
            {/* Skeleton background while loading */}
            {!isLoaded && (
                <div className="absolute inset-0 bg-gray-300 animate-pulse" />
            )}
-           <img 
-             src={item.signed_url || item.cover_url || ''} 
-             alt={item.title} 
-             loading="lazy"
-             decoding="async"
-             className={`w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-             onLoad={() => setIsLoaded(true)}
-           />
+           {hasEnteredView && (
+             <img 
+               src={item.signed_url || item.cover_url || ''} 
+               alt={item.title} 
+               decoding="async"
+               className={`w-full h-full object-cover transition-all duration-500 ease-out group-hover:scale-105 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+               onLoad={() => setIsLoaded(true)}
+             />
+           )}
         </div>
       ) : (
         <div className="flex items-center justify-center h-full text-center p-2 bg-gray-200">
