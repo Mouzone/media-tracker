@@ -58,9 +58,9 @@ function Dashboard() {
   // It handles all the logic for "blocking" page 1 vs "background" preloading
   const { shouldShowSkeleton } = useSmartPreloader({ data, isLoading })
 
-  // Aggressive prefetching: Trigger next page load when user is within 4000px of the bottom
-  // This is roughly 4-5 viewports, effectively "prefetching" the next page immediately.
-  const observerOptions = useMemo(() => ({ rootMargin: '4000px' }), [])
+  // Normal prefetching: Trigger next page load when user is within 400px of the bottom
+  // This provides a balance between seamless scrolling and performance.
+  const observerOptions = useMemo(() => ({ rootMargin: '400px' }), [])
   const [ref, inView] = useInView(observerOptions)
 
   useEffect(() => {
