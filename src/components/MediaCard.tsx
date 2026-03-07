@@ -24,14 +24,14 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
   return (
     <motion.div 
       layoutId={`card-${item.id}`}
-      className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-200 m-0 p-0"
+      className="relative aspect-[2/3] cursor-pointer overflow-hidden group bg-gray-200 dark:bg-gray-800 m-0 p-0"
       onClick={() => onClick(item)}
     >
       {item.signed_url || item.cover_url ? (
-        <div ref={ref} className="relative w-full h-full bg-gray-200">
+        <div ref={ref} className="relative w-full h-full bg-gray-200 dark:bg-gray-800">
            {/* Skeleton background while loading */}
            {!isLoaded && (
-               <div className="absolute inset-0 bg-gray-300 animate-pulse" />
+               <div className="absolute inset-0 bg-gray-300 dark:bg-gray-700 animate-pulse" />
            )}
            {hasEnteredView && (
              <img 
@@ -43,12 +43,12 @@ export const MediaCard = React.memo(function MediaCard({ item, onClick }: MediaC
            )}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-full text-center p-2 bg-gray-200">
-          <span className="text-sm font-semibold text-gray-400">{item.title}</span>
+        <div className="flex items-center justify-center h-full text-center p-2 bg-gray-200 dark:bg-gray-800">
+          <span className="text-sm font-semibold text-gray-400 dark:text-gray-300">{item.title}</span>
         </div>
       )}
-      <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-white via-white/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-end p-3 pointer-events-none">
-        <div className="text-gray-900 text-sm w-full">
+      <div className="absolute inset-x-0 bottom-0 top-1/2 bg-gradient-to-t from-white dark:from-gray-900 via-white/80 dark:via-gray-900/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-end p-3 pointer-events-none">
+        <div className="text-gray-900 dark:text-gray-100 text-sm w-full">
           <Marquee text={item.title} className="font-bold text-sm tracking-tight" />
           <p className="text-xs">
             {item.type === 'tv' 

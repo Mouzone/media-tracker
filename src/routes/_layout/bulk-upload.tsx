@@ -201,18 +201,18 @@ function BulkUpload() {
     return (
         <div className="max-w-4xl mx-auto pt-10 px-4 sm:px-6">
           <div className="mb-10 text-center flex flex-col items-center">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex justify-center items-center mb-6 border border-gray-200 shadow-sm">
-                  <Save className="w-8 h-8 text-gray-400" />
+              <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex justify-center items-center mb-6 border border-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-200">
+                  <Save className="w-8 h-8 text-gray-400 dark:text-gray-500" />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-semibold tracking-widest text-gray-900 mb-3 uppercase">Bulk Upload</h1>
-              <p className="text-gray-500 text-sm sm:text-base tracking-wide max-w-lg font-medium">Paste a list of titles (one per line) or a spreadsheet selection and quickly batch add them to your tracker.</p>
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-widest text-gray-900 dark:text-gray-100 mb-3 uppercase transition-colors duration-200">Bulk Upload</h1>
+              <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base tracking-wide max-w-lg font-medium transition-colors duration-200">Paste a list of titles (one per line) or a spreadsheet selection and quickly batch add them to your tracker.</p>
           </div>
           
-          <div className="bg-white/95 backdrop-blur-3xl p-6 sm:p-10 rounded-3xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative overflow-hidden group">
-            <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-50"></div>
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-3xl p-6 sm:p-10 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative overflow-hidden group transition-colors duration-200">
+            <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent opacity-50"></div>
             
             <textarea
-                className="w-full h-72 sm:h-96 p-6 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 font-mono text-sm sm:text-base leading-relaxed placeholder-gray-400 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all resize-none font-medium"
+                className="w-full h-72 sm:h-96 p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-gray-900 dark:text-gray-100 font-mono text-sm sm:text-base leading-relaxed placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all resize-none font-medium"
                 placeholder="Inception&#10;The Matrix&#10;Interstellar"
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
@@ -222,7 +222,7 @@ function BulkUpload() {
                  <button 
                     onClick={handleParse}
                     disabled={!inputData.trim()} 
-                    className="px-8 py-3.5 bg-gray-900 text-white rounded-xl hover:bg-black hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 text-sm"
+                    className="px-8 py-3.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-xl hover:bg-black dark:hover:bg-gray-200 hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 text-sm"
                 >
                     Parse Data
                  </button>
@@ -236,17 +236,17 @@ function BulkUpload() {
     <div className="w-full max-w-[1600px] mx-auto pt-8 pb-32 px-4 sm:px-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-6">
         <div>
-            <h1 className="text-3xl font-semibold tracking-wide text-gray-900 mb-2">Review Items</h1>
-            <p className="text-gray-500 text-sm tracking-wide font-medium">{items.length} items to process</p>
+            <h1 className="text-3xl font-semibold tracking-wide text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-200">Review Items</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm tracking-wide font-medium">{items.length} items to process</p>
         </div>
         <div className="flex gap-4">
-             <button onClick={handleClear} className="px-6 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-100 font-bold tracking-wide rounded-xl transition-colors text-sm">
+             <button onClick={handleClear} className="px-6 py-3 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 font-bold tracking-wide rounded-xl transition-colors text-sm">
                 Cancel
              </button>
              <button 
                 onClick={handleSubmit} 
                 disabled={isSubmitting || items.filter(i => i.selected).length === 0}
-                className="px-6 py-3 bg-gray-900 text-white font-bold tracking-wide rounded-xl hover:bg-black hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-lg flex items-center gap-2 text-sm"
+                className="px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold tracking-wide rounded-xl hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-lg flex items-center gap-2 text-sm"
             >
                 {isSubmitting ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
                 Save ({items.filter(i => i.selected).length})
@@ -254,13 +254,13 @@ function BulkUpload() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden overflow-x-auto">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden overflow-x-auto transition-colors duration-200">
          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 border-b border-gray-200 text-[10px] uppercase tracking-widest text-gray-500 font-bold">
+            <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800 text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold transition-colors">
                 <tr>
                     <th className="px-5 py-4 w-10">
                         <input type="checkbox" 
-                            className="rounded border-gray-300 bg-white focus:ring-gray-900 text-gray-900 w-4 h-4 cursor-pointer transition-all"
+                            className="rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-gray-900 dark:focus:ring-gray-100 text-gray-900 dark:text-gray-100 w-4 h-4 cursor-pointer transition-all"
                             checked={items.every(i => i.selected)}
                             onChange={(e) => {
                                 setItems(prev => prev.map(i => ({ ...i, selected: e.target.checked })))
@@ -279,12 +279,12 @@ function BulkUpload() {
                     <th className="px-5 py-4 w-10 pr-6"></th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-gray-900">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-900 dark:text-gray-100 transition-colors">
                 {items.map(item => (
-                    <tr key={item.id} className={clsx("hover:bg-gray-50 transition-colors", !item.selected && "opacity-40")}>
+                    <tr key={item.id} className={clsx("hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", !item.selected && "opacity-40")}>
                         <td className="px-5 py-4">
                              <input type="checkbox" 
-                                className="rounded border-gray-300 bg-white focus:ring-gray-900 text-gray-900 w-4 h-4 cursor-pointer transition-all"
+                                className="rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-gray-900 dark:focus:ring-gray-100 text-gray-900 dark:text-gray-100 w-4 h-4 cursor-pointer transition-all"
                                 checked={!!item.selected} onChange={(e) => updateItem(item.id, { selected: e.target.checked })} />
                         </td>
                         <td className="px-5 py-4">
@@ -298,8 +298,8 @@ function BulkUpload() {
                                     <ImageIcon className="w-5 h-5 text-gray-400 group-hover:scale-110 transition-transform" />
                                 )}
                                 {item.isUploadingCover && (
-                                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center backdrop-blur-sm">
-                                        <Loader2 className="w-4 h-4 text-gray-900 animate-spin" />
+                                    <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center backdrop-blur-sm transition-colors">
+                                        <Loader2 className="w-4 h-4 text-gray-900 dark:text-gray-100 animate-spin" />
                                     </div>
                                 )}
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
@@ -316,7 +316,7 @@ function BulkUpload() {
                         </td>
                         <td className="px-5 py-4">
                             <input 
-                                className="w-full bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-400 text-gray-900 outline-none px-1 py-1 transition-colors placeholder-gray-400 font-bold"
+                                className="w-full bg-transparent border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 text-gray-900 dark:text-gray-100 outline-none px-1 py-1 transition-colors placeholder-gray-400 dark:placeholder-gray-500 font-bold"
                                 value={item.title}
                                 onChange={(e) => updateItem(item.id, { title: e.target.value })}
                                 placeholder="Title required"
@@ -324,7 +324,7 @@ function BulkUpload() {
                         </td>
                         <td className="px-5 py-4">
                              <select 
-                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
+                                className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.type}
                                 onChange={(e) => updateItem(item.id, { type: e.target.value as MediaType })}
                              >
@@ -335,7 +335,7 @@ function BulkUpload() {
                         </td>
                          <td className="px-5 py-4">
                              <select 
-                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
+                                className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.status}
                                 onChange={(e) => updateItem(item.id, { status: e.target.value as StatusType })}
                              >
@@ -350,7 +350,7 @@ function BulkUpload() {
                                 <input 
                                     type="number" 
                                     min="0"
-                                    className="w-16 bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 transition-colors placeholder-gray-400 text-center font-bold"
+                                    className="w-16 bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 transition-colors placeholder-gray-400 dark:placeholder-gray-500 text-center font-bold"
                                     placeholder="S"
                                     value={item.seasons || ''}
                                     onChange={(e) => updateItem(item.id, { seasons: e.target.value ? Number(e.target.value) : undefined })}
@@ -366,7 +366,7 @@ function BulkUpload() {
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'like' ? null : 'like' })}
                                     className={clsx(
                                         "p-1.5 rounded-full transition-colors",
-                                        item.rating === 'like' ? "text-gray-900 bg-gray-200" : "text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+                                        item.rating === 'like' ? "text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     )}
                                 >
                                     <ThumbsUp className="w-4 h-4" />
@@ -375,7 +375,7 @@ function BulkUpload() {
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'dislike' ? null : 'dislike' })}
                                     className={clsx(
                                         "p-1.5 rounded-full transition-colors",
-                                        item.rating === 'dislike' ? "text-gray-900 bg-gray-200" : "text-gray-400 hover:text-gray-900 hover:bg-gray-100"
+                                        item.rating === 'dislike' ? "text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     )}
                                 >
                                     <ThumbsDown className="w-4 h-4" />
@@ -385,14 +385,14 @@ function BulkUpload() {
                         <td className="px-5 py-4">
                             <input 
                                 type="date"
-                                className="bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 w-32 transition-colors text-[13px] font-bold"
+                                className="bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 w-32 transition-colors text-[13px] font-bold"
                                 value={item.date_finished}
                                 onChange={(e) => updateItem(item.id, { date_finished: e.target.value })}
                             />
                         </td>
                         <td className="px-5 py-4">
                             <input
-                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none px-1 py-1 truncate focus:truncate-0 transition-colors placeholder-gray-400 text-[13px] font-medium"
+                                className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none px-1 py-1 truncate focus:truncate-0 transition-colors placeholder-gray-400 dark:placeholder-gray-500 text-[13px] font-medium"
                                 value={item.review}
                                 onChange={(e) => updateItem(item.id, { review: e.target.value })}
                                 placeholder="Thoughts..."
@@ -437,14 +437,14 @@ function BulkUpload() {
                                     />
                                     {/* Tag Suggestions */}
                                     {focusedTagInputId === item.id && tagInput.trim().length > 0 && (
-                                        <div className="absolute z-20 top-full mt-2 left-0 w-48 max-h-48 overflow-y-auto rounded-xl bg-white border border-gray-200 shadow-xl overflow-hidden py-1">
+                                        <div className="absolute z-20 top-full mt-2 left-0 w-48 max-h-48 overflow-y-auto rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden py-1 transition-colors">
                                             {allTags
                                                 .filter(t => !item.tags.includes(t) && t.toLowerCase().includes(tagInput.toLowerCase()))
                                                 .slice(0, 5)
                                                 .map(tag => (
                                                 <button
                                                     key={tag}
-                                                    className="w-full text-left px-4 py-3 text-xs text-gray-700 font-medium hover:text-gray-900 hover:bg-gray-50 block transition-colors border-b border-gray-100 last:border-0"
+                                                    className="w-full text-left px-4 py-3 text-xs text-gray-700 dark:text-gray-200 font-medium hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 block transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0"
                                                     onMouseDown={(e) => {
                                                         e.preventDefault() // Prevent blur
                                                         updateItem(item.id, { tags: [...item.tags, tag] })
@@ -472,18 +472,18 @@ function BulkUpload() {
             </tbody>
          </table>
          {items.length > 5 && (
-            <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-center">
-                 <button onClick={handleParse} className="text-xs uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 transition-colors">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 flex justify-center transition-colors">
+                 <button onClick={handleParse} className="text-xs uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors">
                     Paste More Items (Append)
                  </button>
             </div>
          )}
       </div>
 
-       <div className="mt-12 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 relative overflow-hidden group shadow-sm">
-            <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-4">Paste More to Append</h2>
+       <div className="mt-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden group shadow-sm transition-colors duration-200">
+            <h2 className="text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400 uppercase mb-4 transition-colors">Paste More to Append</h2>
              <textarea
-                className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-mono text-sm leading-relaxed placeholder-gray-400 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all resize-none font-medium"
+                className="w-full h-32 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 font-mono text-sm leading-relaxed placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all resize-none font-medium"
                 placeholder="Paste more items here..."
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}

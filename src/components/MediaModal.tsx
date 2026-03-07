@@ -187,14 +187,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white/95 backdrop-blur-3xl border border-gray-200 p-4 sm:p-8 text-left align-middle shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all">
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-3xl border border-gray-200 dark:border-gray-800 p-4 sm:p-8 text-left align-middle shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all">
                 <div className="flex justify-between items-center mb-6">
-                  <Dialog.Title as="h3" className="text-xl font-bold tracking-tight text-gray-900">
+                  <Dialog.Title as="h3" className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
                     {item ? 'Edit Details' : 'New Entry'}
                   </Dialog.Title>
                   <button
                     onClick={onClose}
-                    className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
+                    className="p-2 -mr-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -203,7 +203,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                 <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8">
                     {/* Left Column: Cover */}
                     <div className="h-full">
-                        <div className="w-full h-full min-h-[300px] relative rounded-2xl overflow-hidden bg-gray-50 group shadow-inner border border-gray-200/50">
+                        <div className="w-full h-full min-h-[300px] relative rounded-2xl overflow-hidden bg-gray-50 dark:bg-gray-800 group shadow-inner border border-gray-200/50 dark:border-gray-700/50">
                             <input 
                                 type="file" 
                                 accept="image/*"
@@ -247,7 +247,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors p-4 text-center">
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-300 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors p-4 text-center">
                                     <Plus className="w-8 h-8 mb-3" />
                                     <div className="text-sm font-semibold tracking-wide uppercase">Upload Art</div>
                                 </div>
@@ -259,10 +259,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                     <div className="space-y-4 flex flex-col justify-center min-w-0">
                         {/* Title */}
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Title</label>
+                            <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Title</label>
                             <input 
                                 type="text" 
-                                className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
+                                className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm"
                                 placeholder="Enter title..."
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -272,9 +272,9 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                         {/* Type, Status, Seasons */}
                         <div className={`grid gap-3 ${type === 'tv' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
                             <div>
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Type</label>
+                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Type</label>
                                 <select 
-                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none appearance-none transition-all font-medium text-sm"
+                                    className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm"
                                     value={type}
                                     onChange={(e) => setType(e.target.value as MediaType)}
                                 >
@@ -284,9 +284,9 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                 </select>
                             </div>
                              <div>
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Status</label>
+                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Status</label>
                                 <select 
-                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none appearance-none transition-all font-medium text-sm"
+                                    className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm"
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value as StatusType)}
                                 >
@@ -298,12 +298,12 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                             </div>
                             {type === 'tv' && (
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Seasons</label>
+                                    <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Seasons</label>
                                     <input 
                                         type="number"
                                         min="1"
                                         placeholder="#"
-                                        className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm text-center"
+                                        className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm text-center"
                                         value={seasons}
                                         onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
                                     />
@@ -313,11 +313,11 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                         {/* Date & Rating */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                              <div>
-                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Date Finished</label>
+                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Date Finished</label>
                                 <div className="relative">
                                     <input 
                                         type="date" 
-                                        className="block w-full min-w-0 max-w-[100%] rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 pr-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
+                                        className="block w-full min-w-0 max-w-[100%] rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 pr-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm"
                                         value={dateFinished}
                                         onChange={(e) => setDateFinished(e.target.value)}
                                     />
@@ -325,14 +325,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                 </div>
                             </div>
                             <div>
-                                 <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Rating</label>
+                                 <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Rating</label>
                                  <div className="flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => setRating(rating === 'like' ? null : 'like')}
                                         className={clsx(
                                             "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
-                                            rating === 'like' ? "bg-gray-900 text-white border-gray-900" : "bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                                            rating === 'like' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
                                         )}
                                     >
                                         <ThumbsUp className="w-4 h-4" />
@@ -342,7 +342,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                         onClick={() => setRating(rating === 'dislike' ? null : 'dislike')}
                                         className={clsx(
                                             "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
-                                            rating === 'dislike' ? "bg-gray-900 text-white border-gray-900" : "bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                                            rating === 'dislike' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
                                         )}
                                     >
                                         <ThumbsDown className="w-4 h-4" />
@@ -353,14 +353,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
 
                         {/* Tags */}
                         <div>
-                             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Tags</label>
+                             <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Tags</label>
                              <div className="w-full">
                                 <Combobox value={tags} onChange={setTags} multiple>
                                     <div className="relative">
-                                        <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 border border-gray-200 text-left focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-300 transition-all">
+                                        <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-left focus-within:ring-2 focus-within:ring-gray-900/10 dark:focus-within:ring-gray-100/10 focus-within:border-gray-300 dark:focus-within:border-gray-600 transition-all">
                                             <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] items-center">
                                                 {tags.map(tag => (
-                                                    <span key={tag} className="bg-gray-200 text-gray-900 text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold tracking-wide uppercase">
+                                                    <span key={tag} className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold tracking-wide uppercase">
                                                         {tag}
                                                         <button 
                                                             onClick={(e) => { 
@@ -374,7 +374,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                                     </span>
                                                 ))}
                                                 <Combobox.Input
-                                                    className="flex-1 bg-transparent text-sm min-w-[80px] outline-none border-none p-1 focus:ring-0 text-gray-900 placeholder-gray-400 font-medium"
+                                                    className="flex-1 bg-transparent text-sm min-w-[80px] outline-none border-none p-1 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 font-medium"
                                                     placeholder={tags.length === 0 ? "Add tags..." : ""}
                                                     onChange={(event) => setTagInput(event.target.value)}
                                                     onKeyDown={(e) => {
@@ -402,10 +402,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                             leaveTo="opacity-0"
                                             afterLeave={() => setTagInput('')}
                                         >
-                                            <Combobox.Options className="absolute mt-2 max-h-48 w-full z-20 overflow-auto rounded-xl bg-white border border-gray-200 py-1 text-sm shadow-xl focus:outline-none">
+                                            <Combobox.Options className="absolute mt-2 max-h-48 w-full z-20 overflow-auto rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 py-1 text-sm shadow-xl focus:outline-none">
                                                 {suggestedTags.length === 0 && tagInput !== '' ? (
                                                     <Combobox.Option
-                                                        className="relative cursor-pointer select-none py-2 px-4 text-gray-700 ui-active:bg-gray-50 ui-active:text-gray-900 transition-colors font-medium"
+                                                        className="relative cursor-pointer select-none py-2 px-4 text-gray-700 dark:text-gray-300 ui-active:bg-gray-50 dark:ui-active:bg-gray-700 ui-active:text-gray-900 dark:ui-active:text-gray-100 transition-colors font-medium"
                                                         value={tagInput}
                                                     >
                                                         Create "{tagInput}"
@@ -445,9 +445,9 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
 
                         {/* Review */}
                         <div>
-                             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Review</label>
+                             <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Review</label>
                              <textarea 
-                                className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none h-20 resize-none transition-all font-medium text-sm leading-snug"
+                                className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none h-20 resize-none transition-all font-medium text-sm leading-snug"
                                 value={review}
                                 onChange={(e) => setReview(e.target.value)}
                                 placeholder="Thoughts on this?"
@@ -456,12 +456,12 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                     </div>
                 </div>
 
-                <div className="mt-6 flex flex-col-reverse sm:flex-row border-t border-gray-100 pt-5 justify-between items-center sm:items-center gap-4 sm:gap-0">
+                <div className="mt-6 flex flex-col-reverse sm:flex-row border-t border-gray-100 dark:border-gray-800 pt-5 justify-between items-center sm:items-center gap-4 sm:gap-0">
                   <div className="w-full sm:w-auto">
                       {item && (
                           <button
                               type="button"
-                              className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-red-50 text-red-600 px-4 py-2.5 text-sm font-bold tracking-wide hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm border border-red-100"
+                              className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-2.5 text-sm font-bold tracking-wide hover:bg-red-100 dark:hover:bg-red-900/50 hover:scale-105 active:scale-95 transition-all shadow-sm border border-red-100 dark:border-red-900/50"
                               onClick={handleDelete}
                           >
                               Delete Item
@@ -471,14 +471,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                   <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
                     <button
                         type="button"
-                        className="w-full sm:w-auto text-gray-500 hover:bg-gray-100 hover:text-gray-900 text-sm font-bold tracking-wide transition-colors px-3 py-2.5 rounded-xl border border-transparent"
+                        className="w-full sm:w-auto text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 text-sm font-bold tracking-wide transition-colors px-3 py-2.5 rounded-xl border border-transparent"
                         onClick={onClose}
                     >
                         Cancel
                     </button>
                     <button
                         type="button"
-                        className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-gray-900 text-white px-6 py-2.5 text-sm font-bold tracking-wide hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-2.5 text-sm font-bold tracking-wide hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleSave}
                         disabled={!title || isLoading}
                     >

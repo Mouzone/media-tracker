@@ -2,23 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 255 255 255;
-  --foreground: 10 10 10;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 10 10 10;
-    --foreground: 255 255 255;
-  }
-}
-
 html, body {
   overscroll-behavior-y: none;
 }
 
-body {
-  color: rgb(var(--foreground));
-  background: rgb(var(--background));
+/* Force override Tailwind gray with true black neutral palette for dark mode */
+@layer utilities {
+  .dark .dark\:bg-gray-900 {
+    background-color: #000000 !important;
+  }
+  .dark .dark\:bg-gray-800 {
+    background-color: #111111 !important;
+  }
+  .dark .dark\:bg-gray-700 {
+    background-color: #222222 !important;
+  }
+  .dark .dark\:border-gray-800 {
+    border-color: #222222 !important;
+  }
+  .dark .dark\:border-gray-700 {
+    border-color: #333333 !important;
+  }
 }
