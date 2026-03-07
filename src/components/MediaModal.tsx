@@ -2,10 +2,9 @@ import { Dialog, Transition, Combobox } from '@headlessui/react'
 import { Fragment, useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { MediaItem, MediaType, StatusType } from '../types'
-import { searchMedia, SearchResult } from '../services/api'
 import { uploadCoverImage, validateImageResponse } from '../services/storage'
 import { supabase } from '../utils/supabase'
-import { X, Search, Plus, Loader2, Calendar, CheckCircle, XCircle, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { X, Plus, Calendar, CheckCircle, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 
 interface MediaModalProps {
@@ -27,12 +26,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [newCoverPath, setNewCoverPath] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
-  const [isTagInputFocused, setIsTagInputFocused] = useState(false)
   const queryClient = useQueryClient()
-  
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-  const [showResults, setShowResults] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   // Initialize form when item changes or modal opens
@@ -78,8 +72,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setCoverUrl('')
         setTags([])
       }
-      setSearchResults([])
-      setShowResults(false)
       setTagInput('')
       setNewCoverPath(null)
     }
@@ -88,16 +80,6 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const suggestedTags = existingTags
     .filter(tag => !tags.includes(tag) && tag.toLowerCase().includes(tagInput.toLowerCase()))
     .slice(0, 5)
-
-  const handleResultSelect = (result: SearchResult) => {
-      setTitle(result.title)
-      setType(result.type)
-      setCoverUrl(result.cover_url || '')
-      setNewCoverPath(null) // Reset custom upload if picking from search
-      // Assuming result might have release date we could use?
-      // For now just basic info
-      setShowResults(false)
-  }
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -145,6 +127,20 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     }
   }
 
+  const handleDelete = async () => {
+      if (!item || !window.confirm('Are you sure you want to delete this item?')) return;
+      setIsLoading(true);
+      const { error } = await supabase.from('media_items').delete().eq('id', item.id);
+      setIsLoading(false);
+      if (!error) {
+          onClose();
+          queryClient.invalidateQueries({ queryKey: ['mediaItems'] });
+      } else {
+          console.error("Error deleting:", error);
+          alert("Failed to delete item");
+      }
+  }
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -164,30 +160,30 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition.Child
               as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="ease-out duration-500"
+              enterFrom="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-300"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all">
-                <div className="flex justify-between items-start mb-6">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                    {item ? 'Edit Item' : 'Add New Item'}
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white/95 backdrop-blur-3xl border border-gray-200 p-4 sm:p-8 text-left align-middle shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all">
+                <div className="flex justify-between items-center mb-6">
+                  <Dialog.Title as="h3" className="text-xl font-bold tracking-tight text-gray-900">
+                    {item ? 'Edit Details' : 'New Entry'}
                   </Dialog.Title>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors focus:outline-none"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8">
                     {/* Left Column: Cover */}
-                    <div>
-                        <div className="aspect-[2/3] relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 group border border-gray-200 dark:border-gray-700">
+                    <div className="h-full">
+                        <div className="w-full h-full min-h-[300px] relative rounded-2xl overflow-hidden bg-gray-50 group shadow-inner border border-gray-200/50">
                             <input 
                                 type="file" 
                                 accept="image/*"
@@ -224,41 +220,53 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                             />
                             {coverUrl ? (
                                 <>
-                                    <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                        <div className="text-white font-medium">Change Cover</div>
+                                    <img src={coverUrl} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none backdrop-blur-sm">
+                                        <Plus className="w-8 h-8 text-gray-900 mb-2" />
+                                        <div className="text-gray-900 font-bold text-sm tracking-widest uppercase">Update</div>
                                     </div>
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-400 p-4 text-center">
-                                    <Plus className="w-8 h-8 mb-2" />
-                                    <div className="text-sm font-medium">Upload Cover</div>
-                                    <div className="text-xs mt-1">Min: 300x450 • Max: 5MB</div>
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors p-4 text-center">
+                                    <Plus className="w-8 h-8 mb-3" />
+                                    <div className="text-sm font-semibold tracking-wide uppercase">Upload Art</div>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Right Column: Details */}
-                    <div className="space-y-4">
-                        {/* Type & Status */}
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4 flex flex-col justify-center">
+                        {/* Title */}
+                        <div>
+                            <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Title</label>
+                            <input 
+                                type="text" 
+                                className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
+                                placeholder="Enter title..."
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
+
+                        {/* Type, Status, Seasons */}
+                        <div className={`grid gap-3 ${type === 'tv' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Type</label>
                                 <select 
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none appearance-none transition-all font-medium text-sm"
                                     value={type}
                                     onChange={(e) => setType(e.target.value as MediaType)}
                                 >
                                     <option value="movie">Movie</option>
-                                    <option value="tv">TV Show</option>
+                                    <option value="tv">TV</option>
                                     <option value="book">Book</option>
                                 </select>
                             </div>
                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Status</label>
                                 <select 
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none appearance-none"
+                                    className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none appearance-none transition-all font-medium text-sm"
                                     value={status}
                                     onChange={(e) => setStatus(e.target.value as StatusType)}
                                 >
@@ -268,163 +276,89 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     <option value="dropped">Dropped</option>
                                 </select>
                             </div>
-                        </div>
-                        
-                        {type === 'tv' && (
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seasons</label>
-                                <input 
-                                    type="number"
-                                    min="1"
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={seasons}
-                                    onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
-                                />
-                            </div>
-                        )}
-
-
-
-                        {/* Title with Search */}
-                        <div className="relative">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
+                            {type === 'tv' && (
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Seasons</label>
                                     <input 
-                                        type="text" 
-                                        className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="Search title..."
-                                        value={title}
-                                        onChange={(e) => {
-                                            setTitle(e.target.value)
-                                            setShowResults(true)
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault()
-                                                setIsSearching(true)
-                                                searchMedia(title, type).then(results => {
-                                                    setSearchResults(results)
-                                                    setIsSearching(false)
-                                                    setShowResults(true)
-                                                })
-                                            }
-                                        }}
+                                        type="number"
+                                        min="1"
+                                        placeholder="#"
+                                        className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm text-center"
+                                        value={seasons}
+                                        onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
                                     />
-                                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        setIsSearching(true)
-                                        const results = await searchMedia(title, type)
-                                        setSearchResults(results)
-                                        setIsSearching(false)
-                                        setShowResults(true)
-                                    }}
-                                    className="px-3 py-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                                    disabled={isSearching || !title}
-                                >
-                                    {isSearching ? <Loader2 className="w-5 h-5 animate-spin" /> : "Search"}
-                                </button>
-                            </div>
-                            
-                            {/* Search Results Dropdown */}
-                            {showResults && (searchResults.length > 0 || isSearching || (title.length > 2 && searchResults.length === 0 && !isSearching)) && (
-                                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
-                                    {isSearching && (
-                                        <div className="p-4 text-center text-gray-500">Searching...</div>
-                                    )}
-                                    {!isSearching && searchResults.length === 0 && (
-                                        <div className="p-4 text-center text-gray-500">No results found</div>
-                                    )}
-                                    {!isSearching && searchResults.map((result) => (
-                                        <button
-                                            key={result.id}
-                                            className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-3 border-b last:border-0 dark:border-gray-700"
-                                            onClick={() => handleResultSelect(result)}
-                                        >
-                                            {result.cover_url && <img src={result.cover_url} className="w-8 h-12 object-cover rounded" />}
-                                            <div>
-                                                <div className="font-medium">{result.title}</div>
-                                                <div className="text-xs text-gray-500">{result.year}</div>
-                                            </div>
-                                        </button>
-                                    ))}
                                 </div>
                             )}
                         </div>
-
-                        {/* Date Finished */}
-                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Finished</label>
-                            <div className="relative">
-                                <input 
-                                    type="date" 
-                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 pl-10 focus:ring-2 focus:ring-blue-500 outline-none"
-                                    value={dateFinished}
-                                    onChange={(e) => setDateFinished(e.target.value)}
-                                />
-                                <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                        {/* Date & Rating */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                             <div>
+                                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Date Finished</label>
+                                <div className="relative">
+                                    <input 
+                                        type="date" 
+                                        className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all font-medium text-sm"
+                                        value={dateFinished}
+                                        onChange={(e) => setDateFinished(e.target.value)}
+                                    />
+                                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
+                                </div>
                             </div>
-                        </div>
-
-                        {/* Rating */}
-                        <div>
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rating</label>
-                             <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setRating(rating === 'like' ? null : 'like')}
-                                    className={clsx(
-                                        "p-2 rounded-full transition-colors",
-                                        rating === 'like' ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    )}
-                                >
-                                    <ThumbsUp className="w-6 h-6" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setRating(rating === 'dislike' ? null : 'dislike')}
-                                    className={clsx(
-                                        "p-2 rounded-full transition-colors",
-                                        rating === 'dislike' ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    )}
-                                >
-                                    <ThumbsDown className="w-6 h-6" />
-                                </button>
-                             </div>
+                            <div>
+                                 <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Rating</label>
+                                 <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setRating(rating === 'like' ? null : 'like')}
+                                        className={clsx(
+                                            "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
+                                            rating === 'like' ? "bg-gray-900 text-white border-gray-900" : "bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                                        )}
+                                    >
+                                        <ThumbsUp className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setRating(rating === 'dislike' ? null : 'dislike')}
+                                        className={clsx(
+                                            "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
+                                            rating === 'dislike' ? "bg-gray-900 text-white border-gray-900" : "bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100 hover:text-gray-900"
+                                        )}
+                                    >
+                                        <ThumbsDown className="w-4 h-4" />
+                                    </button>
+                                 </div>
+                            </div>
                         </div>
 
                         {/* Tags */}
                         <div>
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
+                             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Tags</label>
                              <div className="w-full">
                                 <Combobox value={tags} onChange={setTags} multiple>
-                                    <div className="relative mt-1">
-                                        <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 text-left shadow-sm focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 sm:text-sm">
-                                            <div className="flex flex-wrap gap-2 p-2 min-h-[42px]">
+                                    <div className="relative">
+                                        <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 border border-gray-200 text-left focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-300 transition-all">
+                                            <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] items-center">
                                                 {tags.map(tag => (
-                                                    <span key={tag} className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                                    <span key={tag} className="bg-gray-200 text-gray-900 text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold tracking-wide uppercase">
                                                         {tag}
                                                         <button 
                                                             onClick={(e) => { 
                                                                 e.stopPropagation()
                                                                 setTags(tags.filter(t => t !== tag))
                                                             }} 
-                                                            className="hover:text-blue-600 dark:hover:text-blue-300"
+                                                            className="hover:text-red-500 transition-colors"
                                                         >
                                                             <X className="w-3 h-3" />
                                                         </button>
                                                     </span>
                                                 ))}
                                                 <Combobox.Input
-                                                    className="flex-1 bg-transparent text-sm min-w-[60px] outline-none border-none p-0 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400"
-                                                    placeholder={tags.length === 0 ? "Type and enter..." : ""}
+                                                    className="flex-1 bg-transparent text-sm min-w-[80px] outline-none border-none p-1 focus:ring-0 text-gray-900 placeholder-gray-400 font-medium"
+                                                    placeholder={tags.length === 0 ? "Add tags..." : ""}
                                                     onChange={(event) => setTagInput(event.target.value)}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter' && tagInput) {
-                                                            // Only add if it's a new custom tag, otherwise let Combobox handle the selection
                                                              const filtered = existingTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()))
                                                              if (!filtered.includes(tagInput) && !tags.includes(tagInput)) {
                                                                  e.preventDefault()
@@ -448,10 +382,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                             leaveTo="opacity-0"
                                             afterLeave={() => setTagInput('')}
                                         >
-                                            <Combobox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                                            <Combobox.Options className="absolute mt-2 max-h-48 w-full z-20 overflow-auto rounded-xl bg-white border border-gray-200 py-1 text-sm shadow-xl focus:outline-none">
                                                 {suggestedTags.length === 0 && tagInput !== '' ? (
                                                     <Combobox.Option
-                                                        className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300 ui-active:bg-blue-100 dark:ui-active:bg-blue-900 ui-active:text-blue-900 dark:ui-active:text-blue-100"
+                                                        className="relative cursor-pointer select-none py-2 px-4 text-gray-700 ui-active:bg-gray-50 ui-active:text-gray-900 transition-colors font-medium"
                                                         value={tagInput}
                                                     >
                                                         Create "{tagInput}"
@@ -461,20 +395,20 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                                         <Combobox.Option
                                                             key={tag}
                                                             className={({ active }) =>
-                                                                `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                                                    active ? 'bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100' : 'text-gray-900 dark:text-gray-100'
+                                                                `relative cursor-pointer select-none py-2 pl-9 pr-4 transition-colors ${
+                                                                    active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
                                                                 }`
                                                             }
                                                             value={tag}
                                                         >
-                                                            {({ selected, active }) => (
+                                                            {({ active }) => (
                                                                 <>
-                                                                    <span className={`block truncate ${tags.includes(tag) ? 'font-medium' : 'font-normal'}`}>
+                                                                    <span className={`block truncate ${tags.includes(tag) ? 'font-bold text-gray-900' : 'font-medium'}`}>
                                                                         {tag}
                                                                     </span>
                                                                     {tags.includes(tag) ? (
-                                                                        <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-blue-600' : 'text-blue-600'}`}>
-                                                                            <CheckCircle className="h-5 w-5" aria-hidden="true" />
+                                                                        <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-gray-900' : 'text-gray-900'}`}>
+                                                                            <CheckCircle className="h-4 w-4" aria-hidden="true" />
                                                                         </span>
                                                                     ) : null}
                                                                 </>
@@ -491,34 +425,47 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
 
                         {/* Review */}
                         <div>
-                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Review</label>
+                             <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Review</label>
                              <textarea 
-                                className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none h-24 resize-none"
+                                className="w-full rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none h-20 resize-none transition-all font-medium text-sm leading-snug"
                                 value={review}
                                 onChange={(e) => setReview(e.target.value)}
-                                placeholder="What did you think?"
+                                placeholder="Thoughts on this?"
                              />
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-8 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-lg border border-transparent bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                    onClick={onClose}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleSave}
-                    disabled={!title || isLoading}
-                  >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                    Save Item
-                  </button>
+                <div className="mt-6 flex flex-col-reverse sm:flex-row border-t border-gray-100 pt-5 justify-between items-center sm:items-center gap-4 sm:gap-0">
+                  <div className="w-full sm:w-auto">
+                      {item && (
+                          <button
+                              type="button"
+                              className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-red-50 text-red-600 px-4 py-2.5 text-sm font-bold tracking-wide hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm border border-red-100"
+                              onClick={handleDelete}
+                          >
+                              Delete Item
+                          </button>
+                      )}
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-3 items-center w-full sm:w-auto">
+                    <button
+                        type="button"
+                        className="w-full sm:w-auto text-gray-500 hover:bg-gray-100 hover:text-gray-900 text-sm font-bold tracking-wide transition-colors px-3 py-2.5 rounded-xl border border-transparent"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-gray-900 text-white px-6 py-2.5 text-sm font-bold tracking-wide hover:bg-black hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleSave}
+                        disabled={!title || isLoading}
+                    >
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                        Save Changes
+                    </button>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

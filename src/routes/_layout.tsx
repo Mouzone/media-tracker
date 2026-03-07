@@ -14,8 +14,8 @@ export const Route = createFileRoute('/_layout')({
 
 function Layout() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
-      <main className="container mx-auto p-4">
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
+      <main className="w-full">
         <Outlet />
       </main>
     </div>

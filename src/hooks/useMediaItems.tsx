@@ -8,6 +8,8 @@ interface UseMediaItemsProps {
     type?: 'movie' | 'tv' | 'book'
     sort?: 'date' | 'title' | 'rating'
     search?: string
+    status?: 'finished' | 'dropped'
+    tags?: string[]
   }
 }
 

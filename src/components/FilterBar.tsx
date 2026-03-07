@@ -2,7 +2,6 @@
 import { Fragment, useState } from 'react'
 import { Listbox, Transition, Combobox } from '@headlessui/react'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
-import clsx from 'clsx'
 
 type SortOption = 'date' | 'title' | 'rating'
 type StatusOption = 'finished' | 'dropped' | 'all'
@@ -47,31 +46,26 @@ export function FilterBar({
           tag.toLowerCase().includes(tagQuery.toLowerCase())
         )
 
-  const addTag = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      setSelectedTags([...selectedTags, tag])
-    }
-    setTagQuery('')
-  }
+  // Add Tag (removed unused function)
 
   const removeTag = (tag: string) => {
     setSelectedTags(selectedTags.filter((t) => t !== tag))
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-white border border-gray-100 rounded-3xl shadow-sm items-start md:items-end">
       
       {/* Status Filter */}
-      <div className="w-full md:w-48">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+      <div className="w-full md:w-48 z-30">
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Status</label>
         <Listbox value={status} onChange={setStatus}>
-          <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-lg bg-gray-100 dark:bg-gray-700 py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-              <span className="block truncate text-gray-900 dark:text-gray-100">
+          <div className="relative">
+            <Listbox.Button className="relative w-full cursor-pointer rounded-xl bg-gray-50 border border-gray-200 py-2.5 pl-4 pr-10 text-left transition-colors hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 sm:text-sm text-gray-900 font-semibold shadow-sm h-[42px]">
+              <span className="block truncate text-gray-900">
                 {statusOptions.find(opt => opt.value === status)?.label}
               </span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <ChevronsUpDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
             <Transition
@@ -80,25 +74,25 @@ export function FilterBar({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute mt-1.5 max-h-60 w-full z-40 overflow-auto rounded-xl bg-white border border-gray-200 py-1 text-base shadow-lg focus:outline-none sm:text-sm">
                 {statusOptions.map((opt) => (
                   <Listbox.Option
                     key={opt.value}
                     className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                        active ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100' : 'text-gray-900 dark:text-gray-100'
+                      `relative cursor-pointer select-none py-2.5 pl-10 pr-4 transition-colors ${
+                        active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
                       }`
                     }
                     value={opt.value}
                   >
                     {({ selected }) => (
                       <>
-                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                        <span className={`block truncate ${selected ? 'font-bold text-gray-900' : 'font-medium'}`}>
                           {opt.label}
                         </span>
                         {selected ? (
-                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-indigo-600 dark:text-indigo-400">
-                            <Check className="h-5 w-5" aria-hidden="true" />
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-900">
+                            <Check className="h-4 w-4" aria-hidden="true" />
                           </span>
                         ) : null}
                       </>
@@ -112,16 +106,16 @@ export function FilterBar({
       </div>
 
        {/* Sort Filter */}
-       <div className="w-full md:w-48">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+       <div className="w-full md:w-48 z-20">
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Sort By</label>
         <Listbox value={sortBy} onChange={setSortBy}>
-          <div className="relative mt-1">
-            <Listbox.Button className="relative w-full cursor-default rounded-lg bg-gray-100 dark:bg-gray-700 py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-              <span className="block truncate text-gray-900 dark:text-gray-100">
+          <div className="relative">
+            <Listbox.Button className="relative w-full cursor-pointer rounded-xl bg-gray-50 border border-gray-200 py-2.5 pl-4 pr-10 text-left transition-colors hover:bg-gray-100 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 sm:text-sm text-gray-900 font-semibold shadow-sm h-[42px]">
+              <span className="block truncate text-gray-900">
                 {sortOptions.find(opt => opt.value === sortBy)?.label}
               </span>
-              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronsUpDown className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <ChevronsUpDown className="h-4 w-4 text-gray-400" aria-hidden="true" />
               </span>
             </Listbox.Button>
             <Transition
@@ -130,25 +124,25 @@ export function FilterBar({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+              <Listbox.Options className="absolute mt-1.5 max-h-60 w-full z-40 overflow-auto rounded-xl bg-white border border-gray-200 py-1 text-base shadow-lg focus:outline-none sm:text-sm">
                 {sortOptions.map((opt) => (
                   <Listbox.Option
                     key={opt.value}
                     className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                        active ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100' : 'text-gray-900 dark:text-gray-100'
+                      `relative cursor-pointer select-none py-2.5 pl-10 pr-4 transition-colors ${
+                        active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
                       }`
                     }
                     value={opt.value}
                   >
                     {({ selected }) => (
                       <>
-                        <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                        <span className={`block truncate ${selected ? 'font-bold text-gray-900' : 'font-medium'}`}>
                           {opt.label}
                         </span>
                         {selected ? (
-                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-indigo-600 dark:text-indigo-400">
-                            <Check className="h-5 w-5" aria-hidden="true" />
+                          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-900">
+                            <Check className="h-4 w-4" aria-hidden="true" />
                           </span>
                         ) : null}
                       </>
@@ -162,23 +156,23 @@ export function FilterBar({
       </div>
 
       {/* Tags Filter */}
-      <div className="flex-1">
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter by Tags</label>
+      <div className="flex-1 min-w-[200px] z-10">
+        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 pl-1">Filter by Tags</label>
         <div className="w-full">
             <Combobox value={selectedTags} onChange={setSelectedTags} multiple>
-            <div className="relative mt-1">
-              <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
-                <div className="flex flex-wrap gap-1 p-1">
+            <div className="relative">
+              <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 border border-gray-200 text-left transition-colors focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-300 shadow-sm sm:text-sm">
+                <div className="flex flex-wrap items-center gap-1.5 p-1.5 min-h-[42px]">
                     {selectedTags.map(tag => (
-                        <span key={tag} className="inline-flex items-center px-2 py-1 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 text-xs font-medium">
+                        <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-200 text-gray-800 text-xs font-bold uppercase tracking-wide">
                             {tag}
-                            <button onClick={(e) => { e.stopPropagation(); removeTag(tag); }} className="ml-1 hover:text-indigo-500">
+                            <button onClick={(e) => { e.stopPropagation(); removeTag(tag); }} className="ml-1.5 hover:text-red-500 transition-colors">
                                 <X className="h-3 w-3" />
                             </button>
                         </span>
                     ))}
                     <Combobox.Input
-                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 dark:text-gray-100 bg-transparent focus:ring-0"
+                    className="flex-1 w-full border-none px-2 py-1 text-sm leading-5 text-gray-900 font-medium placeholder-gray-400 bg-transparent focus:ring-0 outline-none min-w-[80px]"
                     onChange={(event) => setTagQuery(event.target.value)}
                     placeholder={selectedTags.length === 0 ? "Select tags..." : ""}
                     displayValue={() => tagQuery} 
@@ -193,41 +187,36 @@ export function FilterBar({
                 leaveTo="opacity-0"
                 afterLeave={() => setTagQuery('')}
               >
-                <Combobox.Options className="absolute mt-1 max-h-60 w-full z-10 overflow-auto rounded-md bg-white dark:bg-gray-700 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                <Combobox.Options className="absolute mt-1.5 max-h-60 w-full z-40 overflow-auto rounded-xl bg-white border border-gray-200 py-1 text-base shadow-lg focus:outline-none sm:text-sm">
                   {filteredTags.length === 0 && tagQuery !== '' ? (
-                    <Combobox.Option
-                        className="relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-gray-300 ui-active:bg-indigo-100 ui-active:text-indigo-900"
-                        value={tagQuery}
-                    >
-                      Create "{tagQuery}"
-                    </Combobox.Option>
+                    <div className="relative cursor-default select-none py-2.5 px-4 text-gray-500 font-medium">
+                      Nothing found.
+                    </div>
                   ) : (
                     filteredTags.map((tag) => (
                       <Combobox.Option
                         key={tag}
                         className={({ active }) =>
-                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                            active ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-900 dark:text-indigo-100' : 'text-gray-900 dark:text-gray-100'
+                          `relative cursor-pointer select-none py-2.5 pl-10 pr-4 transition-colors ${
+                            active ? 'bg-gray-50 text-gray-900' : 'text-gray-700'
                           }`
                         }
                         value={tag}
                       >
-                        {({ selected, active }) => (
+                        {() => (
                           <>
                             <span
                               className={`block truncate ${
-                                selectedTags.includes(tag) ? 'font-medium' : 'font-normal'
+                                selectedTags.includes(tag) ? 'font-bold text-gray-900' : 'font-medium'
                               }`}
                             >
                               {tag}
                             </span>
                             {selectedTags.includes(tag) ? (
                               <span
-                                className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                  active ? 'text-white' : 'text-teal-600'
-                                }`}
+                                className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-900"
                               >
-                                <Check className="h-5 w-5" aria-hidden="true" />
+                                <Check className="h-4 w-4" aria-hidden="true" />
                               </span>
                             ) : null}
                           </>

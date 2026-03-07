@@ -195,26 +195,30 @@ function BulkUpload() {
 
   if (!isReviewing) {
     return (
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Bulk Upload</h1>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-4">
-            <div>
-                <label className="block text-sm font-medium mb-2">Paste Data (List or Table)</label>
-                <div className="text-xs text-gray-500 mb-2">
-                    Paste a list of titles (one per line) or a spreadsheet selection.
-                </div>
-                <textarea
-                    className="w-full h-64 p-4 border rounded-lg dark:bg-gray-900 dark:border-gray-700 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Inception&#10;The Matrix&#10;Interstellar"
-                    value={inputData}
-                    onChange={(e) => setInputData(e.target.value)}
-                />
-            </div>
-            <div className="flex justify-end">
+        <div className="max-w-4xl mx-auto pt-10 px-4 sm:px-6">
+          <div className="mb-10 text-center flex flex-col items-center">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex justify-center items-center mb-6 border border-gray-200 shadow-sm">
+                  <Save className="w-8 h-8 text-gray-400" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-semibold tracking-widest text-gray-900 mb-3 uppercase">Bulk Upload</h1>
+              <p className="text-gray-500 text-sm sm:text-base tracking-wide max-w-lg font-medium">Paste a list of titles (one per line) or a spreadsheet selection and quickly batch add them to your tracker.</p>
+          </div>
+          
+          <div className="bg-white/95 backdrop-blur-3xl p-6 sm:p-10 rounded-3xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative overflow-hidden group">
+            <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent opacity-50"></div>
+            
+            <textarea
+                className="w-full h-72 sm:h-96 p-6 bg-gray-50 border border-gray-200 rounded-2xl text-gray-900 font-mono text-sm sm:text-base leading-relaxed placeholder-gray-400 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all resize-none font-medium"
+                placeholder="Inception&#10;The Matrix&#10;Interstellar"
+                value={inputData}
+                onChange={(e) => setInputData(e.target.value)}
+            />
+            
+            <div className="flex justify-end mt-8">
                  <button 
                     onClick={handleParse}
                     disabled={!inputData.trim()} 
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="px-8 py-3.5 bg-gray-900 text-white rounded-xl hover:bg-black hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100 font-bold tracking-widest uppercase transition-all shadow-lg flex items-center justify-center gap-3 text-sm"
                 >
                     Parse Data
                  </button>
@@ -225,70 +229,76 @@ function BulkUpload() {
   }
 
   return (
-    <div className="max-w-[95%] mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Review Items ({items.length})</h1>
-        <div className="flex gap-3">
-             <button onClick={handleClear} className="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 rounded-lg">
-                Cancel / Clear
+    <div className="w-full max-w-[1600px] mx-auto pt-8 pb-32 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-6">
+        <div>
+            <h1 className="text-3xl font-semibold tracking-wide text-gray-900 mb-2">Review Items</h1>
+            <p className="text-gray-500 text-sm tracking-wide font-medium">{items.length} items to process</p>
+        </div>
+        <div className="flex gap-4">
+             <button onClick={handleClear} className="px-6 py-3 text-gray-500 hover:text-gray-900 hover:bg-gray-100 font-bold tracking-wide rounded-xl transition-colors text-sm">
+                Cancel
              </button>
              <button 
                 onClick={handleSubmit} 
                 disabled={isSubmitting || items.filter(i => i.selected).length === 0}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 font-medium"
+                className="px-6 py-3 bg-gray-900 text-white font-bold tracking-wide rounded-xl hover:bg-black hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-lg flex items-center gap-2 text-sm"
             >
                 {isSubmitting ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                Save Selected ({items.filter(i => i.selected).length})
+                Save ({items.filter(i => i.selected).length})
              </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden overflow-x-auto">
-         <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-xs uppercase text-gray-500 font-medium">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden overflow-x-auto">
+         <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 border-b border-gray-200 text-[10px] uppercase tracking-widest text-gray-500 font-bold">
                 <tr>
-                    <th className="px-4 py-3 w-10">
+                    <th className="px-5 py-4 w-10">
                         <input type="checkbox" 
+                            className="rounded border-gray-300 bg-white focus:ring-gray-900 text-gray-900 w-4 h-4 cursor-pointer transition-all"
                             checked={items.every(i => i.selected)}
                             onChange={(e) => {
                                 setItems(prev => prev.map(i => ({ ...i, selected: e.target.checked })))
                             }}
                         />
                     </th>
-                    <th className="px-4 py-3 w-20">Cover</th>
-                    <th className="px-4 py-3 min-w-[200px]">Title</th>
-                    <th className="px-4 py-3 w-32">Type</th>
-                    <th className="px-4 py-3 w-32">Status</th>
-                    <th className="px-4 py-3 w-24">Seasons</th>
-                    <th className="px-4 py-3 w-32">Rating</th>
-                    <th className="px-4 py-3 w-40">Date Finished</th>
-                    <th className="px-4 py-3 min-w-[200px]">Review</th>
-                    <th className="px-4 py-3 w-48">Tags</th>
-                    <th className="px-4 py-3 w-10">Actions</th>
+                    <th className="px-5 py-4 w-20">Cover</th>
+                    <th className="px-5 py-4 min-w-[200px]">Title</th>
+                    <th className="px-5 py-4 w-32">Type</th>
+                    <th className="px-5 py-4 w-32">Status</th>
+                    <th className="px-5 py-4 w-24">Seasons</th>
+                    <th className="px-5 py-4 w-32">Rating</th>
+                    <th className="px-5 py-4 w-40">Date Finished</th>
+                    <th className="px-5 py-4 min-w-[200px]">Review</th>
+                    <th className="px-5 py-4 w-48">Tags</th>
+                    <th className="px-5 py-4 w-10 pr-6"></th>
                 </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-gray-100 text-gray-900">
                 {items.map(item => (
-                    <tr key={item.id} className={clsx("hover:bg-gray-50 dark:hover:bg-gray-750", !item.selected && "opacity-50")}>
-                        <td className="px-4 py-3">
-                             <input type="checkbox" checked={!!item.selected} onChange={(e) => updateItem(item.id, { selected: e.target.checked })} />
+                    <tr key={item.id} className={clsx("hover:bg-gray-50 transition-colors", !item.selected && "opacity-40")}>
+                        <td className="px-5 py-4">
+                             <input type="checkbox" 
+                                className="rounded border-gray-300 bg-white focus:ring-gray-900 text-gray-900 w-4 h-4 cursor-pointer transition-all"
+                                checked={!!item.selected} onChange={(e) => updateItem(item.id, { selected: e.target.checked })} />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                             <div 
-                                className="relative w-12 h-16 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden flex items-center justify-center cursor-pointer group border border-transparent hover:border-blue-500"
+                                className="relative w-12 h-16 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center cursor-pointer group border border-gray-200 hover:border-gray-400 transition-all shadow-sm"
                                 onClick={() => fileInputRefs.current[item.id]?.click()}
                             >
                                 {item.cover_url ? (
                                     <img src={item.cover_url} className="w-full h-full object-cover" />
                                 ) : (
-                                    <ImageIcon className="w-5 h-5 text-gray-400" />
+                                    <ImageIcon className="w-5 h-5 text-gray-400 group-hover:scale-110 transition-transform" />
                                 )}
                                 {item.isUploadingCover && (
-                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center backdrop-blur-sm">
+                                        <Loader2 className="w-4 h-4 text-gray-900 animate-spin" />
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors pointer-events-none" />
                             </div>
                             <input 
                                 type="file" 
@@ -300,57 +310,59 @@ function BulkUpload() {
                                 }}
                             />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                             <input 
-                                className="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none px-1 py-0.5"
+                                className="w-full bg-transparent border-b border-transparent hover:border-gray-200 focus:border-gray-400 text-gray-900 outline-none px-1 py-1 transition-colors placeholder-gray-400 font-bold"
                                 value={item.title}
                                 onChange={(e) => updateItem(item.id, { title: e.target.value })}
                                 placeholder="Title required"
                             />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                              <select 
-                                className="w-full bg-transparent border rounded p-1 text-xs"
+                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.type}
                                 onChange={(e) => updateItem(item.id, { type: e.target.value as MediaType })}
                              >
                                 <option value="movie">Movie</option>
-                                <option value="tv">TV</option>
+                                <option value="tv">TV Show</option>
                                 <option value="book">Book</option>
                              </select>
                         </td>
-                         <td className="px-4 py-3">
+                         <td className="px-5 py-4">
                              <select 
-                                className="w-full bg-transparent border rounded p-1 text-xs"
+                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.status}
                                 onChange={(e) => updateItem(item.id, { status: e.target.value as StatusType })}
                              >
                                 <option value="finished">Finished</option>
                                 <option value="dropped">Dropped</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="backlog">Backlog</option>
                              </select>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                             {item.type === 'tv' ? (
                                 <input 
                                     type="number" 
                                     min="0"
-                                    className="w-16 bg-transparent border rounded p-1 text-xs"
+                                    className="w-16 bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 transition-colors placeholder-gray-400 text-center font-bold"
                                     placeholder="S"
                                     value={item.seasons || ''}
                                     onChange={(e) => updateItem(item.id, { seasons: e.target.value ? Number(e.target.value) : undefined })}
                                 />
                             ) : (
-                                <span className="text-gray-400 text-xs">-</span>
+                                <span className="text-gray-400 text-[13px] flex w-full justify-center font-bold">-</span>
                             )}
                         </td>
 
-                        <td className="px-4 py-3">
-                            <div className="flex gap-1">
+                        <td className="px-5 py-4">
+                            <div className="flex gap-2">
                                 <button 
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'like' ? null : 'like' })}
                                     className={clsx(
-                                        "p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700",
-                                        item.rating === 'like' ? "text-green-500" : "text-gray-300"
+                                        "p-1.5 rounded-full transition-colors",
+                                        item.rating === 'like' ? "text-gray-900 bg-gray-200" : "text-gray-400 hover:text-gray-900 hover:bg-gray-100"
                                     )}
                                 >
                                     <ThumbsUp className="w-4 h-4" />
@@ -358,42 +370,42 @@ function BulkUpload() {
                                 <button 
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'dislike' ? null : 'dislike' })}
                                     className={clsx(
-                                        "p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700",
-                                        item.rating === 'dislike' ? "text-red-500" : "text-gray-300"
+                                        "p-1.5 rounded-full transition-colors",
+                                        item.rating === 'dislike' ? "text-gray-900 bg-gray-200" : "text-gray-400 hover:text-gray-900 hover:bg-gray-100"
                                     )}
                                 >
                                     <ThumbsDown className="w-4 h-4" />
                                 </button>
                             </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                             <input 
                                 type="date"
-                                className="bg-transparent border rounded p-1 text-xs w-32"
+                                className="bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none py-1 w-32 transition-colors text-[13px] font-bold"
                                 value={item.date_finished}
                                 onChange={(e) => updateItem(item.id, { date_finished: e.target.value })}
                             />
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-5 py-4">
                             <input
-                                className="w-full bg-transparent border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none px-1 py-0.5 text-xs truncate focus:truncate-0"
+                                className="w-full bg-transparent text-gray-900 border-b border-transparent hover:border-gray-200 focus:border-gray-400 outline-none px-1 py-1 truncate focus:truncate-0 transition-colors placeholder-gray-400 text-[13px] font-medium"
                                 value={item.review}
                                 onChange={(e) => updateItem(item.id, { review: e.target.value })}
-                                placeholder="Write a review..."
+                                placeholder="Thoughts..."
                             />
                         </td>
-                        <td className="px-4 py-3">
-                                    <div className="flex flex-wrap gap-1">
+                        <td className="px-5 py-4">
+                            <div className="flex flex-wrap gap-1.5 items-center">
                                 {item.tags.map(tag => (
-                                    <span key={tag} className="text-[10px] bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-1.5 py-0.5 rounded flex items-center">
+                                    <span key={tag} className="text-[10px] bg-gray-200 text-gray-900 px-2 py-1 rounded-sm flex items-center tracking-wide font-bold uppercase">
                                         {tag}
-                                        <button onClick={() => updateItem(item.id, { tags: item.tags.filter(t => t !== tag) })} className="ml-1 hover:text-red-500">×</button>
+                                        <button onClick={() => updateItem(item.id, { tags: item.tags.filter(t => t !== tag) })} className="ml-1 hover:text-red-500 transition-colors">×</button>
                                     </span>
                                 ))}
                                 <div className="relative">
                                     <input 
-                                        className="text-xs bg-transparent outline-none w-20 min-w-[50px] placeholder:text-gray-400"
-                                        placeholder="+Tag"
+                                        className="text-xs bg-transparent text-gray-900 outline-none w-20 min-w-[60px] placeholder:text-gray-400 placeholder:font-bold font-medium"
+                                        placeholder="+ tag"
                                         value={item.id === focusedTagInputId ? tagInput : ''}
                                         onFocus={() => {
                                             setFocusedTagInputId(item.id)
@@ -421,14 +433,14 @@ function BulkUpload() {
                                     />
                                     {/* Tag Suggestions */}
                                     {focusedTagInputId === item.id && tagInput.trim().length > 0 && (
-                                        <div className="absolute z-10 bottom-full mb-1 left-0 w-48 max-h-32 overflow-y-auto rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
+                                        <div className="absolute z-20 top-full mt-2 left-0 w-48 max-h-48 overflow-y-auto rounded-xl bg-white border border-gray-200 shadow-xl overflow-hidden py-1">
                                             {allTags
                                                 .filter(t => !item.tags.includes(t) && t.toLowerCase().includes(tagInput.toLowerCase()))
                                                 .slice(0, 5)
                                                 .map(tag => (
                                                 <button
                                                     key={tag}
-                                                    className="w-full text-left px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700 block"
+                                                    className="w-full text-left px-4 py-3 text-xs text-gray-700 font-medium hover:text-gray-900 hover:bg-gray-50 block transition-colors border-b border-gray-100 last:border-0"
                                                     onMouseDown={(e) => {
                                                         e.preventDefault() // Prevent blur
                                                         updateItem(item.id, { tags: [...item.tags, tag] })
@@ -438,13 +450,16 @@ function BulkUpload() {
                                                     {tag}
                                                 </button>
                                             ))}
+                                            {allTags.filter(t => !item.tags.includes(t) && t.toLowerCase().includes(tagInput.toLowerCase())).length === 0 && (
+                                                <div className="px-4 py-3 text-xs text-gray-500 italic font-medium">No exact tags found. Press enter to create "{tagInput}"</div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </td>
-                        <td className="px-4 py-3">
-                            <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                        <td className="px-5 py-4 pr-6 text-right">
+                            <button onClick={() => removeItem(item.id)} className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-gray-100 rounded-full inline-flex">
                                 <Trash2 className="w-4 h-4" />
                             </button>
                         </td>
@@ -453,18 +468,18 @@ function BulkUpload() {
             </tbody>
          </table>
          {items.length > 5 && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-center">
-                 <button onClick={handleParse} className="text-sm text-blue-600 hover:underline">
+            <div className="p-4 border-t border-gray-200 bg-gray-50 flex justify-center">
+                 <button onClick={handleParse} className="text-xs uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 transition-colors">
                     Paste More Items (Append)
                  </button>
             </div>
          )}
       </div>
 
-       <div className="mt-8">
-            <h2 className="text-lg font-medium mb-4">Paste More to Append</h2>
+       <div className="mt-12 bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 relative overflow-hidden group shadow-sm">
+            <h2 className="text-xs font-bold tracking-widest text-gray-500 uppercase mb-4">Paste More to Append</h2>
              <textarea
-                className="w-full h-24 p-4 border rounded-lg dark:bg-gray-900 dark:border-gray-700 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full h-32 p-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 font-mono text-sm leading-relaxed placeholder-gray-400 focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300 outline-none transition-all resize-none font-medium"
                 placeholder="Paste more items here..."
                 value={inputData}
                 onChange={(e) => setInputData(e.target.value)}
@@ -475,14 +490,14 @@ function BulkUpload() {
                     }
                 }}
             />
-             <div className="flex justify-end mt-2">
+             <div className="flex justify-end mt-4">
                  <button 
                     onClick={() => {
                         handleParse()
                         setInputData('')
                     }}
                     disabled={!inputData.trim()} 
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 text-sm font-medium"
+                    className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed font-bold text-xs uppercase tracking-widest transition-all shadow-md"
                 >
                     Parse & Append
                  </button>
