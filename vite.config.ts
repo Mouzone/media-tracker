@@ -11,7 +11,7 @@ export default defineConfig({
     tsConfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon-dark.svg', 'favicon-light.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Media Tracker',
         short_name: 'MediaTracker',
@@ -22,17 +22,17 @@ export default defineConfig({
         background_color: '#ffffff',
         icons: [
           {
-            src: 'icons/icon-192x192.png',
+            src: 'icons/icon-192x192.png?v=3',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512x512.png',
+            src: 'icons/icon-512x512.png?v=3',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'icons/icon-512x512.png',
+            src: 'icons/icon-512x512.png?v=3',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'

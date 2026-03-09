@@ -5,10 +5,15 @@ import path from 'path';
 async function generateIcons() {
   const svgBuffer = fs.readFileSync('public/icon.svg');
 
+  if (!fs.existsSync('public/icons')) {
+    fs.mkdirSync('public/icons', { recursive: true });
+  }
+
   console.log('Generating 192x192 icon...');
   await sharp(svgBuffer)
     .resize(192, 192)
     .flatten({ background: '#ffffff' })
+    .removeAlpha()
     .png()
     .toFile('public/icons/icon-192x192.png');
 
@@ -16,6 +21,7 @@ async function generateIcons() {
   await sharp(svgBuffer)
     .resize(512, 512)
     .flatten({ background: '#ffffff' })
+    .removeAlpha()
     .png()
     .toFile('public/icons/icon-512x512.png');
 
@@ -27,13 +33,6 @@ async function generateIcons() {
     .png()
     .toFile('public/apple-touch-icon.png');
     
-  console.log('Generating favicon.png...');
-  await sharp(svgBuffer)
-    .resize(32, 32)
-    .flatten({ background: '#ffffff' })
-    .png()
-    .toFile('public/favicon.png');
-
   console.log('Done!');
 }
 
