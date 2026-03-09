@@ -34,6 +34,14 @@ function Dashboard() {
   const [sortBy, setSortBy] = useState<'date' | 'title' | 'rating'>('date')
   const [filterTags, setFilterTags] = useState<string[]>([])
 
+  const handleReset = () => {
+    setSearchQuery('')
+    setActiveTab(null)
+    setFilterStatus('all')
+    setSortBy('date')
+    setFilterTags([])
+  }
+
   // Debounce search query to prevent excessive API calls while typing
   const debouncedSearchQuery = useDebounce(searchQuery, 300)
   
@@ -236,8 +244,18 @@ function Dashboard() {
                      placeholder="Search titles..."
                      value={searchQuery}
                      onChange={e => setSearchQuery(e.target.value)}
-                     className="w-full pl-10 pr-4 py-2.5 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 transition-all font-medium text-sm"
+                     className="w-full pl-10 pr-10 py-2.5 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 transition-all font-medium text-sm"
                  />
+                 {searchQuery && (
+                    <button 
+                        onClick={() => setSearchQuery('')}
+                        className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                        aria-label="Clear search"
+                        title="Clear Search"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                    </button>
+                 )}
                </div>
                
                <div className="flex p-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shrink-0">
@@ -256,6 +274,7 @@ function Dashboard() {
                selectedTags={filterTags}
                setSelectedTags={setFilterTags}
                availableTags={allTags}
+               onReset={handleReset}
              />
           </div>
         </div>

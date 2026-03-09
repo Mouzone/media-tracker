@@ -14,6 +14,7 @@ interface FilterBarProps {
   selectedTags: string[]
   setSelectedTags: (tags: string[]) => void
   availableTags: string[]
+  onReset?: () => void
 }
 
 const sortOptions: { value: SortOption; label: string }[] = [
@@ -35,7 +36,8 @@ export function FilterBar({
   setSortBy, 
   selectedTags, 
   setSelectedTags,
-  availableTags 
+  availableTags,
+  onReset
 }: FilterBarProps) {
   const [tagQuery, setTagQuery] = useState('')
 
@@ -230,6 +232,18 @@ export function FilterBar({
           </Combobox>
         </div>
       </div>
+
+      {/* Reset Button */}
+      {onReset && (
+         <div className="flex items-center z-10 md:ml-auto md:pb-2">
+            <button 
+                onClick={onReset} 
+                className="text-xs font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 uppercase tracking-widest transition-colors flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+               <X className="w-4 h-4" /> Reset
+            </button>
+         </div>
+      )}
     </div>
   )
 }
