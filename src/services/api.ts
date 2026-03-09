@@ -54,19 +54,19 @@ export const getMediaItems = async ({ page, limit, filter }: GetMediaItemsOption
 
   // Sort handling
   if (filter?.sort === 'title') {
-    query = query.order('title', { ascending: true })
+    query = query.order('title', { ascending: true }).order('id', { ascending: true })
   } else if (filter?.sort === 'rating') {
      // 'rating' in db is 'like' | 'dislike', might not sort well alphabetically. 
      // For now let's just stick to default or created_at if not specified.
      // If the user wants to sort by 'like'/'dislike', we can do that, but usually 'rating' means 1-5 stars.
      // Given the types, let's just order by rating column.
-    query = query.order('rating', { ascending: false, nullsFirst: false })
+    query = query.order('rating', { ascending: false, nullsFirst: false }).order('id', { ascending: true })
   } else {
      // Default to date_finished or created_at
      // If date_finished is populated, use that, else created_at
      // Supabase sort doesn't easily do coalesce without a view or rpc. 
      // For now, let's default to created_at descending as per original code.
-     query = query.order('created_at', { ascending: false })
+     query = query.order('created_at', { ascending: false }).order('id', { ascending: true })
   }
 
   const { data, error } = await query
