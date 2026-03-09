@@ -23,6 +23,7 @@ async function generateIcons() {
   await sharp(svgBuffer)
     .resize(180, 180)
     .flatten({ background: '#ffffff' })
+    .removeAlpha()
     .png()
     .toFile('public/apple-touch-icon.png');
     
