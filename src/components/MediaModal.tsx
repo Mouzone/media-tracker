@@ -355,7 +355,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                         <div>
                              <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Tags</label>
                              <div className="w-full">
-                                <Combobox value={tags} onChange={setTags} multiple>
+                                <Combobox value={tags} onChange={(newTags) => {
+                                    setTags(newTags)
+                                    setTagInput('')
+                                }} multiple>
                                     <div className="relative">
                                         <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-left focus-within:ring-2 focus-within:ring-gray-900/10 dark:focus-within:ring-gray-100/10 focus-within:border-gray-300 dark:focus-within:border-gray-600 transition-all">
                                             <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] items-center">
