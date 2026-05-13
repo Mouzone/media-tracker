@@ -19,6 +19,9 @@ create table public.media_items (
   constraint media_items_pkey primary key (id)
 ) tablespace pg_default;
 
+-- Grant access to the table to resolve Supabase Data API changes
+grant all on table public.media_items to anon, authenticated, service_role;
+
 -- Enable RLS
 alter table public.media_items enable row level security;
 
