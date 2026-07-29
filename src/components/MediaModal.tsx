@@ -3,7 +3,8 @@ import { Fragment, useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { MediaItem, MediaType, StatusType } from '../types'
 import { uploadCoverImage, validateImageResponse } from '../services/storage'
-import { supabase } from '../utils/supabase'
+import { db } from '../utils/firebase'
+import { collection, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore'
 import { X, Plus, Calendar, CheckCircle, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -84,13 +85,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const handleSave = async () => {
     setIsLoading(true)
     
-    const user = await supabase.auth.getUser()
-    const userId = user.data.user?.id
-
-    if (!userId) return
-
     const itemData = {
-        user_id: userId,
         title,
         type,
         status,
@@ -106,19 +101,19 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     let insertedItem = null
 
     if (item) {
-        const { error: updateError } = await supabase
-            .from('media_items')
-            .update(itemData)
-            .eq('id', item.id)
-        error = updateError
+        try {
+            await updateDoc(doc(db, 'media_items', item.id), itemData)
+        } catch (updateError) {
+            error = updateError
+        }
     } else {
-        const { data, error: insertError } = await supabase
-            .from('media_items')
-            .insert(itemData)
-            .select()
-            .single()
-        error = insertError
-        if (data) insertedItem = data
+        try {
+            const itemDataWithDate = { ...itemData, created_at: new Date().toISOString() }
+            const docRef = await addDoc(collection(db, 'media_items'), itemDataWithDate)
+            insertedItem = { id: docRef.id, ...itemDataWithDate }
+        } catch (insertError) {
+            error = insertError
+        }
     }
 
     setIsLoading(false)
@@ -150,14 +145,16 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const handleDelete = async () => {
       if (!item || !window.confirm('Are you sure you want to delete this item?')) return;
       setIsLoading(true);
-      const { error } = await supabase.from('media_items').delete().eq('id', item.id);
-      setIsLoading(false);
-      if (!error) {
+      
+      try {
+          await deleteDoc(doc(db, 'media_items', item.id));
           onClose();
           queryClient.invalidateQueries({ queryKey: ['mediaItems'] });
-      } else {
+      } catch (error) {
           console.error("Error deleting:", error);
           alert("Failed to delete item");
+      } finally {
+          setIsLoading(false);
       }
   }
 
@@ -222,13 +219,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                     // Upload
                                     setIsLoading(true)
                                     try {
-                                        const user = await supabase.auth.getUser()
-                                        if (user.data.user?.id) {
-                                            const result = await uploadCoverImage(file, user.data.user.id)
-                                            if (result) {
-                                                setCoverUrl(result.signedUrl)
-                                                setNewCoverPath(result.path)
-                                            }
+                                        const result = await uploadCoverImage(file)
+                                        if (result) {
+                                            setCoverUrl(result.signedUrl)
+                                            setNewCoverPath(result.path)
                                         }
                                     } catch (err) {
                                         console.error(err)

@@ -1,5 +1,5 @@
-
-import { supabase } from '../utils/supabase'
+import { db } from '../utils/firebase'
+import { collection, query, where, orderBy, getDocs, limit, startAt, QueryConstraint } from 'firebase/firestore'
 import { MediaItem } from '../types'
 import { getSignedUrls } from './storage'
 
@@ -23,66 +23,67 @@ export interface GetMediaItemsOptions {
   }
 }
 
-export const getMediaItems = async ({ page, limit, filter }: GetMediaItemsOptions): Promise<MediaItem[]> => {
-  const from = page * limit
-  const to = from + limit - 1
-
-  let query = supabase
-    .from('media_items')
-    .select('*')
-    .range(from, to)
+export const getMediaItems = async ({ page, limit: pageLimit, filter }: GetMediaItemsOptions): Promise<MediaItem[]> => {
+  const mediaRef = collection(db, 'media_items')
+  let constraints: QueryConstraint[] = []
 
   if (filter?.type) {
-    query = query.eq('type', filter.type)
+    constraints.push(where('type', '==', filter.type))
   }
 
   if (filter?.status && filter.status !== 'all') {
-    query = query.eq('status', filter.status)
+    constraints.push(where('status', '==', filter.status))
   }
 
   if (filter?.tags && filter.tags.length > 0) {
-    // .contains means the row must contain ALL the tags in the filter array
-    // .overlaps means the row must contain ANY of the tags in the filter array
-    // Valid arguments for overlaps: (column, array)
-    query = query.overlaps('tags', filter.tags) 
+    // Firestore supports array-contains-any for overlapping tags (max 10 elements)
+    constraints.push(where('tags', 'array-contains-any', filter.tags.slice(0, 10)))
   }
 
-  if (filter?.search) {
-     // rudimentary search
-     query = query.ilike('title', `%${filter.search}%`)
-  }
-
-  // Sort handling
+  // Sorting
   if (filter?.sort === 'title') {
-    query = query.order('title', { ascending: true }).order('id', { ascending: true })
+    constraints.push(orderBy('title', 'asc'))
   } else if (filter?.sort === 'rating') {
-     // 'rating' in db is 'like' | 'dislike', might not sort well alphabetically. 
-     // For now let's just stick to default or created_at if not specified.
-     // If the user wants to sort by 'like'/'dislike', we can do that, but usually 'rating' means 1-5 stars.
-     // Given the types, let's just order by rating column.
-    query = query.order('rating', { ascending: false, nullsFirst: false }).order('id', { ascending: true })
+    constraints.push(orderBy('rating', 'desc'))
   } else {
-     // Default to date_finished or created_at
-     // If date_finished is populated, use that, else created_at
-     // Supabase sort doesn't easily do coalesce without a view or rpc. 
-     // For now, let's default to created_at descending as per original code.
-     query = query.order('created_at', { ascending: false }).order('id', { ascending: true })
+    constraints.push(orderBy('created_at', 'desc'))
   }
 
-  const { data, error } = await query
-
-  if (error) {
-    throw error
+  // We can't do native ilike substring search in Firestore easily. 
+  // For simplicity, we'll fetch more data if there's a search, or just fetch and filter.
+  // We'll apply the limit after client-side filtering if search is active.
+  if (!filter?.search) {
+      // Pagination offset approximation (Firestore requires cursors normally, 
+      // but for simple offset, this is tricky. We'll fetch up to page * limit and slice)
+      // A proper implementation would use startAfter with the last document.
+      constraints.push(limit((page + 1) * pageLimit))
   }
 
-  if (!data || data.length === 0) {
+  const q = query(mediaRef, ...constraints)
+  const snapshot = await getDocs(q)
+  
+  let items: MediaItem[] = []
+  snapshot.forEach(doc => {
+      items.push({ id: doc.id, ...doc.data() } as MediaItem)
+  })
+
+  // Client-side search filter
+  if (filter?.search) {
+      const searchLower = filter.search.toLowerCase()
+      items = items.filter(item => item.title.toLowerCase().includes(searchLower))
+  }
+
+  // Client-side pagination (since we fetched up to page*limit or all if searching)
+  const from = page * pageLimit
+  items = items.slice(from, from + pageLimit)
+
+  if (items.length === 0) {
     return []
   }
 
   // Resolve signed URLs
   const urlToPathMap: Record<string, string> = {}
   const pathsToSign: string[] = []
-  const items = data as MediaItem[]
 
   items.forEach(item => {
       if (!item.cover_url) return
@@ -132,7 +133,6 @@ export const searchMedia = async (query: string, type: 'movie' | 'tv' | 'book'):
         type: 'book'
       }))
     } else {
-      // Use iTunes API for Movies and TV Shows as a free no-key alternative
       const entity = type === 'movie' ? 'movie' : 'tvSeason'
       const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=${type === 'movie' ? 'movie' : 'tvShow'}&entity=${entity}&limit=5`)
       const data = await response.json()
@@ -140,7 +140,7 @@ export const searchMedia = async (query: string, type: 'movie' | 'tv' | 'book'):
         id: item.trackId?.toString() || item.collectionId?.toString(),
         title: item.trackName || item.collectionName,
         year: (item.releaseDate || item.collectionPrice)?.substring(0, 4),
-        cover_url: item.artworkUrl100?.replace('100x100', '600x600'), // Get higher res image
+        cover_url: item.artworkUrl100?.replace('100x100', '600x600'),
         type: type
       }))
     }

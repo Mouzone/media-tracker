@@ -1,68 +1,50 @@
-import { supabase } from '../utils/supabase'
+import { storage } from '../utils/firebase'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 
-export const uploadCoverImage = async (file: File, userId: string): Promise<{ path: string; signedUrl: string } | null> => {
+export const uploadCoverImage = async (file: File): Promise<{ path: string; signedUrl: string } | null> => {
     const fileExt = file.name.split('.').pop()
-    const fileName = `${userId}/${Date.now()}.${fileExt}`
-    const filePath = `${fileName}`
+    const fileName = `${Date.now()}.${fileExt}`
+    const storageRef = ref(storage, `covers/${fileName}`)
 
-    const { error: uploadError } = await supabase.storage
-        .from('covers')
-        .upload(filePath, file)
-
-    if (uploadError) {
+    try {
+        await uploadBytes(storageRef, file)
+        const downloadUrl = await getDownloadURL(storageRef)
+        return {
+            path: fileName,
+            signedUrl: downloadUrl
+        }
+    } catch (uploadError) {
         console.error('Error uploading image:', uploadError)
         throw uploadError
-    }
-
-    // For private buckets, we can't just get the public URL.
-    // We need to sign a URL.
-    const { data: signedData, error: signError } = await supabase.storage
-        .from('covers')
-        .createSignedUrl(filePath, 60 * 60 * 24 * 365) // 1 year expiry for immediate display
-
-    if (signError || !signedData) {
-        console.error('Error signing URL:', signError)
-        throw signError || new Error('No data returned from signing URL')
-    }
-
-    return {
-        path: filePath,
-        signedUrl: signedData.signedUrl
     }
 }
 
 export const getSignedUrl = async (path: string): Promise<string | null> => {
-    // If it's already an HTTP URL (external), return it
     if (path.startsWith('http')) return path
-
-    const { data, error } = await supabase.storage
-        .from('covers')
-        .createSignedUrl(path, 60 * 60) // 1 hour
-
-    if (error || !data) {
-        console.error('Error creating signed URL:', error)
+    
+    try {
+        const storageRef = ref(storage, `covers/${path}`)
+        const url = await getDownloadURL(storageRef)
+        return url
+    } catch (error) {
+        console.error('Error getting download URL:', error)
         return null
     }
-
-    return data.signedUrl
 }
 
 export const getSignedUrls = async (paths: string[]): Promise<Record<string, string>> => {
-    const { data, error } = await supabase.storage
-        .from('covers')
-        .createSignedUrls(paths, 60 * 60) // 1 hour
-
-    if (error || !data) {
-        console.error('Error creating signed URLs:', error)
-        return {}
-    }
-
     const result: Record<string, string> = {}
-    data.forEach(item => {
-        if (item.signedUrl && item.path) {
-            result[item.path] = item.signedUrl
+    
+    await Promise.all(paths.map(async (path) => {
+        try {
+            const storageRef = ref(storage, `covers/${path}`)
+            const url = await getDownloadURL(storageRef)
+            result[path] = url
+        } catch (error) {
+            console.error(`Error getting download URL for ${path}:`, error)
         }
-    })
+    }))
+    
     return result
 }
 

@@ -3,7 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useState, useRef, useEffect } from 'react'
 import { MediaType, StatusType } from '../../types'
 import { Save, Trash2, Loader2, Image as ImageIcon, ThumbsUp, ThumbsDown } from 'lucide-react'
-import { supabase } from '../../utils/supabase'
+import { db } from '../../utils/firebase'
+import { collection, getDocs, writeBatch, doc } from 'firebase/firestore'
 import { uploadCoverImage, validateImageResponse } from '../../services/storage'
 import clsx from 'clsx'
 
@@ -68,16 +69,14 @@ function BulkUpload() {
   // Fetch existing tags for autocomplete
   const [allTags, setAllTags] = useState<string[]>([])
   useEffect(() => {
-      supabase
-        .from('media_items')
-        .select('tags')
-        .not('tags', 'is', null)
-        .then(({ data }) => {
-            if (data) {
-                const tags = Array.from(new Set(data.flatMap(d => d.tags || []))).sort()
-                setAllTags(tags)
-            }
-        })
+      getDocs(collection(db, 'media_items')).then((snapshot) => {
+          const tags = new Set<string>()
+          snapshot.forEach(d => {
+              const data = d.data()
+              if (data.tags) data.tags.forEach((tag: string) => tags.add(tag))
+          })
+          setAllTags(Array.from(tags).sort())
+      })
   }, [])
 
   const [focusedTagInputId, setFocusedTagInputId] = useState<string | null>(null)
@@ -134,12 +133,9 @@ function BulkUpload() {
     updateItem(id, { isUploadingCover: true })
     
     try {
-        const user = await supabase.auth.getUser()
-        if (user.data.user?.id) {
-            const result = await uploadCoverImage(file, user.data.user.id)
-            if (result) {
-                updateItem(id, { cover_url: result.signedUrl, cover_path: result.path })
-            }
+        const result = await uploadCoverImage(file)
+        if (result) {
+            updateItem(id, { cover_url: result.signedUrl, cover_path: result.path })
         }
     } catch (err) {
         console.error("Upload failed", err)
@@ -161,12 +157,7 @@ function BulkUpload() {
 
     setIsSubmitting(true)
     
-    const user = await supabase.auth.getUser()
-    const userId = user.data.user?.id
-    if (!userId) return
-
     const records = selectedItems.map(item => ({
-        user_id: userId,
         title: item.title,
         type: item.type,
         status: item.status,
@@ -176,22 +167,29 @@ function BulkUpload() {
         cover_url: item.cover_path || item.cover_url || null,
         date_finished: item.date_finished || null,
         seasons: item.type === 'tv' && item.seasons ? item.seasons : null,
+        created_at: new Date().toISOString()
     }))
 
-    const { error } = await supabase.from('media_items').insert(records)
+    try {
+        const batch = writeBatch(db)
+        records.forEach(record => {
+            const docRef = doc(collection(db, 'media_items'))
+            batch.set(docRef, record)
+        })
+        await batch.commit()
+        
+        setIsSubmitting(false)
 
-    setIsSubmitting(false)
-
-    if (error) {
-        console.error("Bulk insert failed", error)
-        alert("Failed to save items: " + error.message)
-    } else {
         const uploadedIds = new Set(selectedItems.map(i => i.id))
         setItems(prev => prev.filter(i => !uploadedIds.has(i.id)))
         
         queryClient.invalidateQueries({ queryKey: ['mediaItems'] })
         
         router.navigate({ to: '/' })
+    } catch (error: any) {
+        setIsSubmitting(false)
+        console.error("Bulk insert failed", error)
+        alert("Failed to save items: " + error.message)
     }
   }
 

@@ -51,7 +51,8 @@ function Dashboard() {
       hasNextPage, 
       isFetchingNextPage, 
       isLoading,
-      isError 
+      isError,
+      error
   } = useMediaItems({
       filter: {
           type: activeTab || undefined,
@@ -132,7 +133,10 @@ function Dashboard() {
       {/* Media Wall Grid */}
       <div className="w-full relative">
         {isError ? (
-            <div className="flex justify-center items-center h-64"><p className="text-red-400 font-medium">Error loading media. Please try again.</p></div>
+            <div className="flex flex-col justify-center items-center h-64 gap-2">
+               <p className="text-red-400 font-medium">Error loading media. Please try again.</p>
+               <p className="text-red-300 text-sm font-mono max-w-2xl text-center bg-red-500/10 p-4 rounded-lg">{error instanceof Error ? error.message : String(error)}</p>
+            </div>
         ) : shouldShowSkeleton ? (
             <SkeletonGrid count={20} />
         ) : mediaItems.length === 0 ? (
