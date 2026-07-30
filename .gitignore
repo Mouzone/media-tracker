@@ -34,3 +34,7 @@ test_*.js
 
 # Package manager lock files (optional, uncomment if desired)
 # package-lock.json
+
+# Local backups
+backup.json
+backup_images/
