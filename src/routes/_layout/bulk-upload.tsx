@@ -2,7 +2,7 @@ import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useState, useRef, useEffect } from 'react'
 import { MediaType, StatusType } from '../../types'
-import { Save, Trash2, Loader2, Image as ImageIcon, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Save, Trash2, Loader2, Image as ImageIcon, ThumbsUp, ThumbsDown, Minus } from 'lucide-react'
 import { db } from '../../utils/firebase'
 import { collection, getDocs, writeBatch, doc } from 'firebase/firestore'
 import { uploadCoverImage, validateImageResponse } from '../../services/storage'
@@ -18,7 +18,7 @@ interface BulkItem {
   title: string
   type: MediaType
   status: StatusType
-  rating: 'like' | 'dislike' | null
+  rating: 'like' | 'ok' | 'dislike' | null
   review: string
   tags: string[]
   cover_url?: string
@@ -237,24 +237,11 @@ function BulkUpload() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto pt-8 pb-32 px-4 sm:px-6">
+    <div className="w-full max-w-[1600px] mx-auto pt-[max(2rem,env(safe-area-inset-top))] pb-[max(3rem,env(safe-area-inset-bottom))] px-4 sm:px-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-6">
         <div>
             <h1 className="text-3xl font-semibold tracking-wide text-gray-900 dark:text-gray-100 mb-2 transition-colors duration-200">Review Items</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm tracking-wide font-medium">{items.length} items to process</p>
-        </div>
-        <div className="flex gap-4">
-             <button onClick={handleClear} className="px-6 py-3 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 font-bold tracking-wide rounded-xl transition-colors text-sm">
-                Cancel
-             </button>
-             <button 
-                onClick={handleSubmit} 
-                disabled={isSubmitting || items.filter(i => i.selected).length === 0}
-                className="px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold tracking-wide rounded-xl hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-lg flex items-center gap-2 text-sm"
-            >
-                {isSubmitting ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
-                Save ({items.filter(i => i.selected).length})
-             </button>
         </div>
       </div>
 
@@ -262,7 +249,7 @@ function BulkUpload() {
          <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-800 text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-bold transition-colors">
                 <tr>
-                    <th className="px-5 py-4 w-10">
+                    <th className="px-3 py-2 w-10">
                         <input type="checkbox" 
                             className="rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-gray-900 dark:focus:ring-gray-100 text-gray-900 dark:text-gray-100 w-4 h-4 cursor-pointer transition-all"
                             checked={items.every(i => i.selected)}
@@ -271,29 +258,29 @@ function BulkUpload() {
                             }}
                         />
                     </th>
-                    <th className="px-5 py-4 w-20">Cover</th>
-                    <th className="px-5 py-4 min-w-[200px]">Title</th>
-                    <th className="px-5 py-4 w-32">Type</th>
-                    <th className="px-5 py-4 w-32">Status</th>
-                    <th className="px-5 py-4 w-24">Seasons</th>
-                    <th className="px-5 py-4 w-32">Rating</th>
-                    <th className="px-5 py-4 w-40">Date Finished</th>
-                    <th className="px-5 py-4 min-w-[200px]">Review</th>
-                    <th className="px-5 py-4 w-48">Tags</th>
-                    <th className="px-5 py-4 w-10 pr-6"></th>
+                    <th className="px-3 py-2 w-20">Cover</th>
+                    <th className="px-3 py-2 min-w-[200px]">Title</th>
+                    <th className="px-3 py-2 w-32">Type</th>
+                    <th className="px-3 py-2 w-32">Status</th>
+                    <th className="px-3 py-2 w-24">Seasons</th>
+                    <th className="px-3 py-2 w-32">Rating</th>
+                    <th className="px-3 py-2 w-40">Date Finished</th>
+                    <th className="px-3 py-2 min-w-[200px]">Review</th>
+                    <th className="px-3 py-2 w-48">Tags</th>
+                    <th className="px-3 py-2 w-10 pr-6"></th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800 text-gray-900 dark:text-gray-100 transition-colors">
                 {items.map(item => (
                     <tr key={item.id} className={clsx("hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", !item.selected && "opacity-40")}>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                              <input type="checkbox" 
                                 className="rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-gray-900 dark:focus:ring-gray-100 text-gray-900 dark:text-gray-100 w-4 h-4 cursor-pointer transition-all"
                                 checked={!!item.selected} onChange={(e) => updateItem(item.id, { selected: e.target.checked })} />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             <div 
-                                className="relative w-12 h-16 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center cursor-pointer group border border-gray-200 hover:border-gray-400 transition-all shadow-sm"
+                                className="relative w-10 h-14 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center cursor-pointer group border border-gray-200 hover:border-gray-400 transition-all shadow-sm"
                                 onClick={() => fileInputRefs.current[item.id]?.click()}
                             >
                                 {item.cover_url ? (
@@ -318,7 +305,7 @@ function BulkUpload() {
                                 }}
                             />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             <input 
                                 className="w-full bg-transparent border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 text-gray-900 dark:text-gray-100 outline-none px-1 py-1 transition-colors placeholder-gray-400 dark:placeholder-gray-500 font-bold"
                                 value={item.title}
@@ -326,7 +313,7 @@ function BulkUpload() {
                                 placeholder="Title required"
                             />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                              <select 
                                 className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.type}
@@ -337,7 +324,7 @@ function BulkUpload() {
                                 <option value="book">Book</option>
                              </select>
                         </td>
-                         <td className="px-5 py-4">
+                         <td className="px-3 py-2">
                              <select 
                                 className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 appearance-none cursor-pointer text-[13px] font-bold"
                                 value={item.status}
@@ -349,7 +336,7 @@ function BulkUpload() {
                                 <option value="backlog">Backlog</option>
                              </select>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             {item.type === 'tv' ? (
                                 <input 
                                     type="number" 
@@ -364,8 +351,8 @@ function BulkUpload() {
                             )}
                         </td>
 
-                        <td className="px-5 py-4">
-                            <div className="flex gap-2">
+                        <td className="px-3 py-2">
+                            <div className="flex gap-1.5">
                                 <button 
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'like' ? null : 'like' })}
                                     className={clsx(
@@ -373,7 +360,16 @@ function BulkUpload() {
                                         item.rating === 'like' ? "text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     )}
                                 >
-                                    <ThumbsUp className="w-4 h-4" />
+                                    <ThumbsUp className="w-3.5 h-3.5" />
+                                </button>
+                                <button 
+                                    onClick={() => updateItem(item.id, { rating: item.rating === 'ok' ? null : 'ok' })}
+                                    className={clsx(
+                                        "p-1.5 rounded-full transition-colors",
+                                        item.rating === 'ok' ? "text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    )}
+                                >
+                                    <Minus className="w-3.5 h-3.5" />
                                 </button>
                                 <button 
                                     onClick={() => updateItem(item.id, { rating: item.rating === 'dislike' ? null : 'dislike' })}
@@ -382,11 +378,11 @@ function BulkUpload() {
                                         item.rating === 'dislike' ? "text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-700" : "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
                                     )}
                                 >
-                                    <ThumbsDown className="w-4 h-4" />
+                                    <ThumbsDown className="w-3.5 h-3.5" />
                                 </button>
                             </div>
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             <input 
                                 type="date"
                                 className="bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none py-1 w-32 transition-colors text-[13px] font-bold"
@@ -394,7 +390,7 @@ function BulkUpload() {
                                 onChange={(e) => updateItem(item.id, { date_finished: e.target.value })}
                             />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             <input
                                 className="w-full bg-transparent text-gray-900 dark:text-gray-100 border-b border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 outline-none px-1 py-1 truncate focus:truncate-0 transition-colors placeholder-gray-400 dark:placeholder-gray-500 text-[13px] font-medium"
                                 value={item.review}
@@ -402,7 +398,7 @@ function BulkUpload() {
                                 placeholder="Thoughts..."
                             />
                         </td>
-                        <td className="px-5 py-4">
+                        <td className="px-3 py-2">
                             <div className="flex flex-wrap gap-1.5 items-center">
                                 {item.tags.map(tag => (
                                     <span key={tag} className="text-[10px] bg-gray-200 text-gray-900 px-2 py-1 rounded-sm flex items-center tracking-wide font-bold uppercase">
@@ -475,42 +471,21 @@ function BulkUpload() {
                 ))}
             </tbody>
          </table>
-         {items.length > 5 && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 flex justify-center transition-colors">
-                 <button onClick={handleParse} className="text-xs uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors">
-                    Paste More Items (Append)
-                 </button>
-            </div>
-         )}
       </div>
 
-       <div className="mt-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 sm:p-8 relative overflow-hidden group shadow-sm transition-colors duration-200">
-            <h2 className="text-xs font-bold tracking-widest text-gray-500 dark:text-gray-400 uppercase mb-4 transition-colors">Paste More to Append</h2>
-             <textarea
-                className="w-full h-32 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 font-mono text-sm leading-relaxed placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all resize-none font-medium"
-                placeholder="Paste more items here..."
-                value={inputData}
-                onChange={(e) => setInputData(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && e.metaKey) {
-                        handleParse()
-                        setInputData('')
-                    }
-                }}
-            />
-             <div className="flex justify-end mt-4">
-                 <button 
-                    onClick={() => {
-                        handleParse()
-                        setInputData('')
-                    }}
-                    disabled={!inputData.trim()} 
-                    className="px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-black active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed font-bold text-xs uppercase tracking-widest transition-all shadow-md"
-                >
-                    Parse & Append
-                 </button>
-            </div>
-       </div>
+      <div className="flex justify-end gap-4 mt-8">
+           <button onClick={handleClear} className="px-6 py-3 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 font-bold tracking-wide rounded-xl transition-colors text-sm">
+              Cancel
+           </button>
+           <button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting || items.filter(i => i.selected).length === 0}
+              className="px-6 py-3 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold tracking-wide rounded-xl hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-lg flex items-center gap-2 text-sm"
+          >
+              {isSubmitting ? <Loader2 className="animate-spin w-4 h-4" /> : <Save className="w-4 h-4" />}
+              Save ({items.filter(i => i.selected).length})
+           </button>
+      </div>
     </div>
   )
 }

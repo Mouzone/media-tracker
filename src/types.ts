@@ -12,7 +12,7 @@ export interface MediaItem {
   date_finished: string | null
   review: string | null
   tags: string[]
-  rating: 'like' | 'dislike' | null
+  rating: 'like' | 'ok' | 'dislike' | null
   created_at: string
   signed_url?: string
 }
@@ -24,5 +24,5 @@ export interface MediaItemInsert {
     date_finished?: string | Date
     review?: string
     tags?: string[]
-    rating?: 'like' | 'dislike' | null
+    rating?: 'like' | 'ok' | 'dislike' | null
 }

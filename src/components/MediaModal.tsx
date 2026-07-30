@@ -5,7 +5,7 @@ import { MediaItem, MediaType, StatusType } from '../types'
 import { uploadCoverImage, validateImageResponse } from '../services/storage'
 import { db } from '../utils/firebase'
 import { collection, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore'
-import { X, Plus, Calendar, CheckCircle, ThumbsUp, ThumbsDown, Loader2 } from 'lucide-react'
+import { X, Plus, Calendar, CheckCircle, ThumbsUp, ThumbsDown, Loader2, Edit2, Minus } from 'lucide-react'
 import clsx from 'clsx'
 
 interface MediaModalProps {
@@ -22,13 +22,14 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   const [title, setTitle] = useState('')
   const [review, setReview] = useState('')
   const [dateFinished, setDateFinished] = useState('')
-  const [rating, setRating] = useState<'like' | 'dislike' | null>(null)
+  const [rating, setRating] = useState<'like' | 'ok' | 'dislike' | null>(null)
   const [coverUrl, setCoverUrl] = useState('')
   const [newCoverPath, setNewCoverPath] = useState<string | null>(null)
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const queryClient = useQueryClient()
   const [isLoading, setIsLoading] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // Initialize form when item changes or modal opens
   useEffect(() => {
@@ -40,8 +41,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setTitle(item.title)
         setReview(item.review || '')
         setDateFinished(item.date_finished || '')
+        setDateFinished(item.date_finished || '')
         setRating(item.rating || null)
         setTags(item.tags || [])
+        setIsEditing(false)
         
         // Handle signed URL resolution
         // Optimization: Use existing signed_url if available for instant display
@@ -70,8 +73,10 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
         setReview('')
         setDateFinished(new Date().toISOString().split('T')[0]) // Default to today
         setRating(null)
+        setRating(null)
         setCoverUrl('')
         setTags([])
+        setIsEditing(true)
       }
       setTagInput('')
       setNewCoverPath(null)
@@ -163,51 +168,59 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
       <Dialog as="div" className="relative z-50" onClose={onClose}>
         <Transition.Child
           as={Fragment}
-          enter="ease-out duration-300"
+          enter="ease-out duration-200"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-200"
+          leave="ease-in duration-150"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25" />
+          <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-center justify-center p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] text-center">
             <Transition.Child
               as={Fragment}
-              enter="ease-out duration-500"
+              enter="ease-out duration-200"
               enterFrom="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
               enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-300"
+              leave="ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-8 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-3xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-3xl border border-gray-200 dark:border-gray-800 p-4 sm:p-8 text-left align-middle shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all">
-                <div className="flex justify-between items-center mb-6">
-                  <Dialog.Title as="h3" className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-                    {item ? 'Edit Details' : 'New Entry'}
-                  </Dialog.Title>
-                  <button
-                    onClick={onClose}
-                    className="p-2 -mr-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors focus:outline-none"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-[24px] glass-panel bg-white/70 dark:bg-gray-900/70 backdrop-blur-2xl border border-white/50 dark:border-gray-700/50 p-5 sm:p-7 text-left align-middle transition-all shadow-2xl relative">
+                
+                {/* Floating Actions */}
+                <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+                    {item && !isEditing && (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 rounded-full transition-all"
+                        >
+                            <Edit2 className="w-4 h-4" />
+                        </button>
+                    )}
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 rounded-full transition-all"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-6 sm:gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 sm:gap-8 mt-2">
                     {/* Left Column: Cover */}
                     <div className="h-full">
-                        <div className="w-full h-full min-h-[300px] relative rounded-2xl overflow-hidden bg-gray-50 dark:bg-gray-800 group shadow-inner border border-gray-200/50 dark:border-gray-700/50">
+                        <div className="w-full h-full min-h-[240px] relative rounded-xl overflow-hidden bg-gray-50 dark:bg-gray-800 group shadow-inner border border-gray-200/50 dark:border-gray-700/50">
                             <input 
                                 type="file" 
                                 accept="image/*"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                disabled={!isEditing}
+                                className={clsx("absolute inset-0 w-full h-full opacity-0 z-10", isEditing ? "cursor-pointer" : "cursor-default")}
                                 onChange={async (e) => {
                                     const file = e.target.files?.[0]
-                                    if (!file) return
+                                    if (!file || !isEditing) return
 
                                     // Validate
                                     const { valid, error } = await validateImageResponse(file)
@@ -235,108 +248,149 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                             {coverUrl ? (
                                 <>
                                     <img src={coverUrl} alt="Cover" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                                    <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none backdrop-blur-sm">
-                                        <Plus className="w-8 h-8 text-gray-900 mb-2" />
-                                        <div className="text-gray-900 font-bold text-sm tracking-widest uppercase">Update</div>
-                                    </div>
+                                    {isEditing && (
+                                        <div className="absolute inset-0 bg-white/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center pointer-events-none backdrop-blur-sm">
+                                            <Plus className="w-8 h-8 text-gray-900 mb-2" />
+                                            <div className="text-gray-900 font-bold text-sm tracking-widest uppercase">Update</div>
+                                        </div>
+                                    )}
                                 </>
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-300 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-colors p-4 text-center">
-                                    <Plus className="w-8 h-8 mb-3" />
-                                    <div className="text-sm font-semibold tracking-wide uppercase">Upload Art</div>
+                                <div className="flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-300 transition-colors p-4 text-center">
+                                    {isEditing && <Plus className="w-8 h-8 mb-3 group-hover:text-gray-600 dark:group-hover:text-gray-400" />}
+                                    <div className="text-sm font-semibold tracking-wide uppercase">{isEditing ? "Upload Art" : "No Art"}</div>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Right Column: Details */}
-                    <div className="space-y-4 flex flex-col justify-center min-w-0">
+                    <div className="space-y-4 flex flex-col justify-start min-w-0 pr-8">
                         {/* Title */}
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Title</label>
-                            <input 
-                                type="text" 
-                                className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm"
-                                placeholder="Enter title..."
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                            />
+                            {isEditing ? (
+                                <input 
+                                    type="text" 
+                                    className="w-full bg-transparent border-0 outline-none transition-all font-extrabold text-2xl sm:text-3xl px-0 py-1 focus:ring-0 border-b-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 focus:border-primary-500 dark:focus:border-primary-500 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                                    placeholder="Enter title..."
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                />
+                            ) : (
+                                <div className="font-extrabold text-2xl sm:text-3xl px-0 py-1 text-gray-900 dark:text-white break-words">
+                                    {title}
+                                </div>
+                            )}
                         </div>
 
                         {/* Type, Status, Seasons */}
                         <div className={`grid gap-3 ${type === 'tv' ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2'}`}>
                             <div>
-                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Type</label>
-                                <select 
-                                    className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm"
-                                    value={type}
-                                    onChange={(e) => setType(e.target.value as MediaType)}
-                                >
-                                    <option value="movie">Movie</option>
-                                    <option value="tv">TV</option>
-                                    <option value="book">Book</option>
-                                </select>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Type</label>
+                                {isEditing ? (
+                                    <select 
+                                        className="w-full rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm shadow-sm"
+                                        value={type}
+                                        onChange={(e) => setType(e.target.value as MediaType)}
+                                    >
+                                        <option value="movie">Movie</option>
+                                        <option value="tv">TV</option>
+                                        <option value="book">Book</option>
+                                    </select>
+                                ) : (
+                                    <div className="text-base font-bold text-gray-900 dark:text-gray-100 pl-1 py-2 min-h-[38px] flex items-center">
+                                        {type === 'tv' ? 'TV' : type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </div>
+                                )}
                             </div>
                              <div>
-                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Status</label>
-                                <select 
-                                    className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm"
-                                    value={status}
-                                    onChange={(e) => setStatus(e.target.value as StatusType)}
-                                >
-                                    <option value="backlog">Backlog</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="finished">Finished</option>
-                                    <option value="dropped">Dropped</option>
-                                </select>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Status</label>
+                                {isEditing ? (
+                                    <select 
+                                        className="w-full rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 px-3 py-2 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none appearance-none transition-all font-medium text-sm shadow-sm"
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value as StatusType)}
+                                    >
+                                        <option value="backlog">Backlog</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="finished">Finished</option>
+                                        <option value="dropped">Dropped</option>
+                                    </select>
+                                ) : (
+                                    <div className="text-base font-bold text-gray-900 dark:text-gray-100 pl-1 py-2 min-h-[38px] flex items-center capitalize">{status.replace('_', ' ')}</div>
+                                )}
                             </div>
                             {type === 'tv' && (
                                 <div>
-                                    <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Seasons</label>
-                                    <input 
-                                        type="number"
-                                        min="1"
-                                        placeholder="#"
-                                        className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-3 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm text-center"
-                                        value={seasons}
-                                        onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
-                                    />
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Seasons</label>
+                                    {isEditing ? (
+                                        <input 
+                                            type="number"
+                                            min="1"
+                                            placeholder="#"
+                                            className="w-full rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-3 py-2 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm shadow-sm"
+                                            value={seasons}
+                                            onChange={(e) => setSeasons(e.target.value ? Number(e.target.value) : '')}
+                                        />
+                                    ) : (
+                                        <div className="text-base font-bold text-gray-900 dark:text-gray-100 pl-1 py-2 min-h-[38px] flex items-center">{seasons || '-'}</div>
+                                    )}
                                 </div>
                             )}
                         </div>
                         {/* Date & Rating */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                              <div>
-                                <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Date Finished</label>
-                                <div className="relative">
-                                    <input 
-                                        type="date" 
-                                        className="block w-full min-w-0 max-w-[100%] rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 pr-3 py-2.5 pl-9 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm"
-                                        value={dateFinished}
-                                        onChange={(e) => setDateFinished(e.target.value)}
-                                    />
-                                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-gray-400 pointer-events-none" />
-                                </div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Date Finished</label>
+                                {isEditing ? (
+                                    <div className="relative">
+                                        <input 
+                                            type="date" 
+                                            className="block w-full min-w-0 max-w-[100%] rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 pr-3 py-2 pl-9 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none transition-all font-medium text-sm shadow-sm"
+                                            value={dateFinished}
+                                            onChange={(e) => setDateFinished(e.target.value)}
+                                        />
+                                        <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-gray-400 pointer-events-none" />
+                                    </div>
+                                ) : (
+                                    <div className="text-base font-bold text-gray-900 dark:text-gray-100 pl-1 py-2 min-h-[38px] flex items-center">{dateFinished ? new Date(dateFinished).toLocaleDateString() : '-'}</div>
+                                )}
                             </div>
                             <div>
-                                 <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Rating</label>
-                                 <div className="flex gap-2">
+                                 <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Rating</label>
+                                 <div className="flex gap-2 h-[38px]">
                                     <button
                                         type="button"
+                                        disabled={!isEditing}
                                         onClick={() => setRating(rating === 'like' ? null : 'like')}
                                         className={clsx(
-                                            "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
-                                            rating === 'like' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+                                            "flex-1 flex justify-center items-center rounded-lg transition-all border shadow-sm",
+                                            isEditing ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default",
+                                            rating === 'like' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : (isEditing ? "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" : "bg-transparent border-gray-200/50 text-gray-400 opacity-50")
                                         )}
                                     >
                                         <ThumbsUp className="w-4 h-4" />
                                     </button>
                                     <button
                                         type="button"
+                                        disabled={!isEditing}
+                                        onClick={() => setRating(rating === 'ok' ? null : 'ok')}
+                                        className={clsx(
+                                            "flex-1 flex justify-center items-center rounded-lg transition-all border shadow-sm",
+                                            isEditing ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default",
+                                            rating === 'ok' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : (isEditing ? "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" : "bg-transparent border-gray-200/50 text-gray-400 opacity-50")
+                                        )}
+                                    >
+                                        <Minus className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        disabled={!isEditing}
                                         onClick={() => setRating(rating === 'dislike' ? null : 'dislike')}
                                         className={clsx(
-                                            "flex-1 flex justify-center items-center py-2.5 rounded-xl transition-all border shadow-sm hover:scale-105 active:scale-95",
-                                            rating === 'dislike' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+                                            "flex-1 flex justify-center items-center rounded-lg transition-all border shadow-sm",
+                                            isEditing ? "hover:scale-105 active:scale-95 cursor-pointer" : "cursor-default",
+                                            rating === 'dislike' ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100" : (isEditing ? "bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100" : "bg-transparent border-gray-200/50 text-gray-400 opacity-50")
                                         )}
                                     >
                                         <ThumbsDown className="w-4 h-4" />
@@ -347,51 +401,52 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
 
                         {/* Tags */}
                         <div>
-                             <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Tags</label>
+                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Tags</label>
                              <div className="w-full">
-                                <Combobox value={tags} onChange={(newTags) => {
-                                    setTags(newTags)
-                                    setTagInput('')
-                                }} multiple>
-                                    <div className="relative">
-                                        <div className="relative w-full cursor-text overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-left focus-within:ring-2 focus-within:ring-gray-900/10 dark:focus-within:ring-gray-100/10 focus-within:border-gray-300 dark:focus-within:border-gray-600 transition-all">
-                                            <div className="flex flex-wrap gap-1.5 p-2 min-h-[44px] items-center">
-                                                {tags.map(tag => (
-                                                    <span key={tag} className="bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold tracking-wide uppercase">
-                                                        {tag}
-                                                        <button 
-                                                            onClick={(e) => { 
-                                                                e.stopPropagation()
-                                                                setTags(tags.filter(t => t !== tag))
-                                                            }} 
-                                                            className="hover:text-red-500 transition-colors"
-                                                        >
-                                                            <X className="w-3 h-3" />
-                                                        </button>
-                                                    </span>
-                                                ))}
-                                                <Combobox.Input
-                                                    className="flex-1 bg-transparent text-sm min-w-[80px] outline-none border-none p-1 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 font-medium"
-                                                    placeholder={tags.length === 0 ? "Add tags..." : ""}
-                                                    onChange={(event) => setTagInput(event.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && tagInput) {
-                                                             const filtered = existingTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()))
-                                                             if (!filtered.includes(tagInput) && !tags.includes(tagInput)) {
-                                                                 e.preventDefault()
-                                                                 setTags([...tags, tagInput])
-                                                                 setTagInput('')
-                                                             }
-                                                        }
-                                                        if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) {
-                                                            setTags(tags.slice(0, -1))
-                                                        }
-                                                    }}
-                                                    displayValue={() => tagInput}
-                                                    value={tagInput}
-                                                />
+                                {isEditing ? (
+                                    <Combobox value={tags} onChange={(newTags) => {
+                                        setTags(newTags)
+                                        setTagInput('')
+                                    }} multiple>
+                                        <div className="relative">
+                                            <div className="relative w-full cursor-text overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-left focus-within:ring-2 focus-within:ring-gray-900/10 dark:focus-within:ring-gray-100/10 focus-within:border-gray-300 dark:focus-within:border-gray-600 transition-all shadow-sm">
+                                                <div className="flex flex-wrap gap-1 p-1.5 min-h-[38px] items-center">
+                                                    {tags.map(tag => (
+                                                        <span key={tag} className="bg-primary-600 dark:bg-primary-500 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 font-bold tracking-wide uppercase shadow-sm">
+                                                            {tag}
+                                                            <button 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation()
+                                                                    setTags(tags.filter(t => t !== tag))
+                                                                }} 
+                                                                className="hover:text-red-300 transition-colors"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                            </button>
+                                                        </span>
+                                                    ))}
+                                                    <Combobox.Input
+                                                        className="flex-1 bg-transparent text-sm min-w-[80px] outline-none border-none p-1 focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 font-medium"
+                                                        placeholder={tags.length === 0 ? "Add tags..." : ""}
+                                                        onChange={(event) => setTagInput(event.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter' && tagInput) {
+                                                                 const filtered = existingTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()))
+                                                                 if (!filtered.includes(tagInput) && !tags.includes(tagInput)) {
+                                                                     e.preventDefault()
+                                                                     setTags([...tags, tagInput])
+                                                                     setTagInput('')
+                                                                 }
+                                                            }
+                                                            if (e.key === 'Backspace' && tagInput === '' && tags.length > 0) {
+                                                                setTags(tags.slice(0, -1))
+                                                            }
+                                                        }}
+                                                        displayValue={() => tagInput}
+                                                        value={tagInput}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
                                         <Transition
                                             as={Fragment}
                                             leave="transition ease-in duration-100"
@@ -437,23 +492,40 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                         </Transition>
                                     </div>
                                 </Combobox>
+                                ) : (
+                                    <div className="flex flex-wrap gap-2 pl-1 py-1.5 min-h-[38px] items-center">
+                                        {tags.length > 0 ? tags.map(tag => (
+                                            <span key={tag} className="bg-primary-600 dark:bg-primary-500 text-white text-xs px-3 py-1 rounded-full flex items-center font-bold uppercase tracking-widest shadow-sm">
+                                                {tag}
+                                            </span>
+                                        )) : <span className="text-base font-bold text-gray-400">-</span>}
+                                    </div>
+                                )}
                              </div>
                         </div>
 
                         {/* Review */}
                         <div>
-                             <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-300 uppercase tracking-widest mb-1.5 pl-1">Review</label>
-                             <textarea 
-                                className="w-full rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 px-4 py-2.5 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none h-20 resize-none transition-all font-medium text-sm leading-snug"
-                                value={review}
-                                onChange={(e) => setReview(e.target.value)}
-                                placeholder="Thoughts on this?"
-                             />
+                             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1 pl-1">Review</label>
+                             {isEditing ? (
+                                 <textarea 
+                                    className="w-full rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200/60 dark:border-gray-700/60 text-gray-900 dark:text-gray-100 placeholder-gray-400 px-3 py-2 focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 outline-none h-20 resize-none transition-all font-medium text-sm leading-relaxed shadow-sm"
+                                    value={review}
+                                    onChange={(e) => setReview(e.target.value)}
+                                    placeholder="Thoughts on this?"
+                                 />
+                             ) : (
+                                 <div className="text-base text-gray-800 dark:text-gray-200 pl-1 py-2 min-h-[80px] leading-relaxed whitespace-pre-wrap font-medium">
+                                     {review || <span className="text-gray-400 italic font-normal">No review added.</span>}
+                                 </div>
+                             )}
                         </div>
                     </div>
                 </div>
 
-                <div className="mt-6 flex flex-col-reverse sm:flex-row border-t border-gray-100 dark:border-gray-800 pt-5 justify-between items-center sm:items-center gap-4 sm:gap-0">
+                {/* Footer / Actions */}
+                {isEditing && (
+                    <div className="mt-6 flex flex-col-reverse sm:flex-row border-t border-gray-100 dark:border-gray-800/50 pt-4 justify-between items-center sm:items-center gap-4 sm:gap-0">
                   <div className="w-full sm:w-auto">
                       {item && (
                           <button
@@ -475,7 +547,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                     </button>
                     <button
                         type="button"
-                        className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-6 py-2.5 text-sm font-bold tracking-wide hover:bg-black dark:hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl bg-primary-600 dark:bg-primary-500 text-white px-6 py-2.5 text-sm font-bold tracking-wide hover:bg-primary-700 dark:hover:bg-primary-400 hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={handleSave}
                         disabled={!title || isLoading}
                     >
@@ -484,6 +556,7 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                     </button>
                   </div>
                 </div>
+                )}
               </Dialog.Panel>
             </Transition.Child>
           </div>

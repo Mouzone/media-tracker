@@ -9,6 +9,7 @@ import { useInView } from '../../hooks/useInView'
 import { useSmartPreloader } from '../../hooks/useSmartPreloader'
 import { useDebounce } from '../../hooks/useDebounce'
 import { useTheme } from '../../contexts/ThemeContext'
+import { motion } from 'framer-motion'
 
 import { FilterBar } from '../../components/FilterBar'
 
@@ -127,8 +128,18 @@ function Dashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSearchPanelOpen]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05
+      }
+    }
+  }
+
   return (
-    <div className="relative min-h-screen w-full bg-white dark:bg-gray-900 pb-32 overflow-x-hidden transition-colors duration-300">
+    <div className="relative min-h-screen w-full bg-gray-50 dark:bg-gray-900 pb-[calc(8rem+env(safe-area-inset-bottom))] overflow-x-hidden transition-colors duration-150 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950">
       
       {/* Media Wall Grid */}
       <div className="w-full relative">
@@ -138,17 +149,24 @@ function Dashboard() {
                <p className="text-red-300 text-sm font-mono max-w-2xl text-center bg-red-500/10 p-4 rounded-lg">{error instanceof Error ? error.message : String(error)}</p>
             </div>
         ) : shouldShowSkeleton ? (
-            <SkeletonGrid count={20} />
+            <div className="px-2 sm:px-4 py-4">
+                <SkeletonGrid count={20} />
+            </div>
         ) : mediaItems.length === 0 ? (
             <div className="flex justify-center items-center h-64"><p className="text-gray-500 font-medium tracking-wide">Nothing found in this view.</p></div>
         ) : (
           <>
-              {/* Flush Grid Layout */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-0">
-                  {mediaItems.map(item => (
-                    <MediaCard key={item.id} item={item} onClick={handleCardClick} />
+              {/* Spacious Grid Layout */}
+              <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-2 sm:gap-4 lg:gap-5 px-2 sm:px-4 py-4"
+              >
+                  {mediaItems.map((item, index) => (
+                    <MediaCard key={item.id} item={item} index={index} onClick={handleCardClick} />
                   ))}
-              </div>
+              </motion.div>
               {/* Loading trigger element for infinite scroll */}
               <div ref={ref} className="h-16 flex justify-center items-center mt-4 mb-8">
                   {isFetchingNextPage && (
@@ -163,13 +181,13 @@ function Dashboard() {
       </div>
 
       {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-center gap-3 sm:gap-4">
+      <div className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-center gap-3 sm:gap-4 mb-[env(safe-area-inset-bottom)]">
         {/* Expandable Menu Items */}
         <div className={`flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ease-out origin-bottom ${isFabOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-50 pointer-events-none'}`}>
             {/* Toggle Theme Button */}
             <button
                 onClick={toggleTheme}
-                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-md hover:scale-110 active:scale-95 border border-gray-200/60 dark:border-gray-700/60 transition-all duration-300"
+                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 glass text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-md hover:scale-110 active:scale-95 transition-all duration-300"
                 aria-label="Toggle Dark Mode"
                 title="Toggle Theme"
             >
@@ -184,7 +202,7 @@ function Dashboard() {
             <button 
                 id="search-toggle-btn"
                 onClick={() => setIsSearchPanelOpen(!isSearchPanelOpen)}
-                className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md transition-all duration-300 ${isSearchPanelOpen ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white scale-110 border-gray-300 dark:border-gray-600' : 'bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 hover:scale-110 active:scale-95 border border-gray-200/60 dark:border-gray-700/60'}`}
+                className={`flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md transition-all duration-300 ${isSearchPanelOpen ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 scale-110 border border-primary-200 dark:border-primary-700/50' : 'glass text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:scale-110 active:scale-95'}`}
                 aria-label="Toggle Search and Filters"
                 title="Search & Filter"
             >
@@ -194,7 +212,7 @@ function Dashboard() {
             {/* Bulk Upload Button */}
             <Link 
                 to="/bulk-upload"
-                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-md hover:scale-110 active:scale-95 border border-gray-200/60 dark:border-gray-700/60 transition-all duration-300"
+                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 glass text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 rounded-full shadow-md hover:scale-110 active:scale-95 transition-all duration-300"
                 aria-label="Bulk Add"
                 title="Bulk Add"
             >
@@ -204,7 +222,7 @@ function Dashboard() {
             {/* Create Media Button */}
             <button 
                 onClick={() => { setIsFabOpen(false); setSelectedItem(null); setIsModalOpen(true); }}
-                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-full shadow-xl dark:shadow-gray-900/50 hover:shadow-2xl hover:scale-110 active:scale-95 border border-gray-200 dark:border-gray-700 transition-all duration-300 group"
+                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full shadow-lg hover:shadow-xl hover:scale-110 active:scale-95 border border-primary-200 dark:border-primary-800/60 transition-all duration-300 group"
                 aria-label="Add new item"
                 title="Add Single Item"
             >
@@ -215,7 +233,7 @@ function Dashboard() {
         {/* Main Drawer Button */}
         <button 
             onClick={() => setIsFabOpen(!isFabOpen)}
-            className={`flex items-center justify-center w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full shadow-xl dark:shadow-gray-900/50 hover:shadow-2xl active:scale-95 transition-all duration-300 z-50 ${isFabOpen ? 'rotate-180' : 'hover:scale-105'}`}
+            className={`flex items-center justify-center w-[52px] h-[52px] sm:w-[60px] sm:h-[60px] bg-primary-500 hover:bg-primary-600 dark:bg-primary-600 dark:hover:bg-primary-500 text-white rounded-full shadow-xl dark:shadow-primary-900/50 hover:shadow-2xl active:scale-95 transition-all duration-300 z-50 ${isFabOpen ? 'rotate-180 bg-gray-800 dark:bg-gray-700 hover:bg-gray-900 dark:hover:bg-gray-600' : 'hover:scale-105'}`}
             aria-label="Toggle Actions"
         >
             <svg 
@@ -234,8 +252,8 @@ function Dashboard() {
       </div>
 
       {/* Solid Compact Floating Bottom Search/Filter Panel */}
-      <div className={`fixed bottom-0 left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:w-[90%] sm:max-w-2xl z-40 transition-transform duration-500 ease-out ${isSearchPanelOpen ? 'translate-y-0 opacity-100' : 'translate-y-[150%] opacity-0 pointer-events-none'}`}>
-        <div id="search-filter-panel" className="bg-white dark:bg-gray-900 rounded-t-3xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 dark:border-gray-800 p-4 sm:p-5 mx-2 sm:mx-0 mb-2 sm:mb-0">
+      <div className={`fixed bottom-0 left-0 right-0 sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:w-[90%] sm:max-w-2xl z-40 transition-transform duration-500 ease-out pb-[env(safe-area-inset-bottom)] sm:pb-0 ${isSearchPanelOpen ? 'translate-y-0 opacity-100' : 'translate-y-[150%] opacity-0 pointer-events-none'}`}>
+        <div id="search-filter-panel" className="glass-panel rounded-t-3xl sm:rounded-3xl p-4 sm:p-5 mx-2 sm:mx-0 mb-2 sm:mb-0">
           <div className="flex flex-col gap-3">
              {/* Top Row: Search & Tabs */}
              <div className="flex flex-col sm:flex-row gap-3">
@@ -243,13 +261,13 @@ function Dashboard() {
                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                    <svg className="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                  </div>
-                 <input
-                     type="text"
-                     placeholder="Search titles..."
-                     value={searchQuery}
-                     onChange={e => setSearchQuery(e.target.value)}
-                     className="w-full pl-10 pr-10 py-2.5 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 dark:focus:ring-gray-100/10 focus:border-gray-300 dark:focus:border-gray-600 transition-all font-medium text-sm"
-                 />
+                     <input
+                         type="text"
+                         placeholder="Search titles..."
+                         value={searchQuery}
+                         onChange={e => setSearchQuery(e.target.value)}
+                         className="w-full pl-11 pr-11 py-3 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/50 transition-all font-medium text-base shadow-inner"
+                     />
                  {searchQuery && (
                     <button 
                         onClick={() => setSearchQuery('')}
@@ -262,10 +280,10 @@ function Dashboard() {
                  )}
                </div>
                
-               <div className="flex p-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shrink-0">
-                  <button onClick={() => handleTabClick('movie')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'movie' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200'}`}>Movies</button>
-                  <button onClick={() => handleTabClick('tv')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'tv' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200'}`}>TV Series</button>
-                  <button onClick={() => handleTabClick('book')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'book' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-200'}`}>Books</button>
+               <div className="flex p-1 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-full shrink-0">
+                  <button onClick={() => handleTabClick('movie')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'movie' ? 'bg-white dark:bg-gray-700 text-primary-700 dark:text-primary-300 shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>Movies</button>
+                  <button onClick={() => handleTabClick('tv')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'tv' ? 'bg-white dark:bg-gray-700 text-primary-700 dark:text-primary-300 shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>TV Series</button>
+                  <button onClick={() => handleTabClick('book')} className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-colors ${activeTab === 'book' ? 'bg-white dark:bg-gray-700 text-primary-700 dark:text-primary-300 shadow-sm border border-gray-200/60 dark:border-gray-600' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'}`}>Books</button>
                </div>
              </div>
              

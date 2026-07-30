@@ -6,21 +6,11 @@ html, body {
   overscroll-behavior-y: none;
 }
 
-/* Force override Tailwind gray with true black neutral palette for dark mode */
 @layer utilities {
-  .dark .dark\:bg-gray-900 {
-    background-color: #000000 !important;
+  .glass {
+    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-700/30;
   }
-  .dark .dark\:bg-gray-800 {
-    background-color: #111111 !important;
-  }
-  .dark .dark\:bg-gray-700 {
-    background-color: #222222 !important;
-  }
-  .dark .dark\:border-gray-800 {
-    border-color: #222222 !important;
-  }
-  .dark .dark\:border-gray-700 {
-    border-color: #333333 !important;
+  .glass-panel {
+    @apply bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl border border-white/40 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)];
   }
 }
