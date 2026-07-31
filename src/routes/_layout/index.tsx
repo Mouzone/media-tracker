@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
 import { MediaCard } from '../../components/MediaCard'
 import { MediaModal } from '../../components/MediaModal'
 import { SkeletonGrid } from '../../components/SkeletonLoader'
@@ -10,6 +10,8 @@ import { useSmartPreloader } from '../../hooks/useSmartPreloader'
 import { useDebounce } from '../../hooks/useDebounce'
 import { useTheme } from '../../contexts/ThemeContext'
 import { motion } from 'framer-motion'
+import { auth } from '../../utils/firebase'
+import { signOut } from 'firebase/auth'
 
 import { FilterBar } from '../../components/FilterBar'
 
@@ -18,7 +20,17 @@ export const Route = createFileRoute('/_layout/')({
 })
 
 function Dashboard() {
+  const router = useRouter()
   const { theme, toggleTheme } = useTheme()
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.invalidate();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
   const [activeTab, setActiveTab] = useState<'movie' | 'tv' | 'book' | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null)
@@ -184,6 +196,15 @@ function Dashboard() {
       <div className="fixed bottom-6 right-4 sm:bottom-8 sm:right-8 z-50 flex flex-col items-center gap-3 sm:gap-4 mb-[env(safe-area-inset-bottom)]">
         {/* Expandable Menu Items */}
         <div className={`flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ease-out origin-bottom ${isFabOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-50 pointer-events-none'}`}>
+            {/* Logout Button */}
+            <button
+                onClick={handleLogout}
+                className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 glass text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded-full shadow-md hover:scale-110 active:scale-95 transition-all duration-300"
+                aria-label="Logout"
+                title="Logout"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </button>
             {/* Toggle Theme Button */}
             <button
                 onClick={toggleTheme}
