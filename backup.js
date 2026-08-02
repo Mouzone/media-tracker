@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { getStorage, ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import fs from 'fs/promises';
 
 const firebaseConfig = {
@@ -15,9 +16,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 async function backup() {
   try {
+    if (process.env.FIREBASE_EMAIL && process.env.FIREBASE_PASSWORD) {
+      console.log("Authenticating with Firebase...");
+      await signInWithEmailAndPassword(auth, process.env.FIREBASE_EMAIL, process.env.FIREBASE_PASSWORD);
+    } else {
+      console.warn("No FIREBASE_EMAIL or FIREBASE_PASSWORD provided. The backup might fail if security rules require authentication.");
+    }
+
     const mediaRef = collection(db, 'media_items');
     const snapshot = await getDocs(mediaRef);
     const items = [];

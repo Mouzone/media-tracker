@@ -25,4 +25,7 @@ jobs:
         run: npm ci
         
       - name: Run backup script
+        env:
+          FIREBASE_EMAIL: ${{ secrets.FIREBASE_EMAIL }}
+          FIREBASE_PASSWORD: ${{ secrets.FIREBASE_PASSWORD }}
         run: node backup.js
