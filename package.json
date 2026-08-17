@@ -4,30 +4,30 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-    "generate-icons": "node generate-icons.js"
+    "typecheck": "tsc --noEmit",
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "backup": "node scripts/backup.mjs",
+    "optimize-covers": "node scripts/optimize-covers.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
     "@headlessui/react": "^2.2.9",
-    "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-router": "^1.0.0",
-    "@tanstack/router-devtools": "^1.159.5",
-    "@tanstack/router-plugin": "^1.159.5",
     "clsx": "^2.1.0",
     "firebase": "^12.16.0",
-    "framer-motion": "^11.0.0",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tailwind-merge": "^2.2.1",
-    "zod": "^3.22.4"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@tanstack/router-plugin": "^1.159.5",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
+    "firebase-admin": "^14.2.0",
     "postcss": "^8.4.35",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.1",

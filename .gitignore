@@ -1,8 +1,9 @@
 # Dependencies
 node_modules/
 
-# Production
+# Build output
 dist/
+dev-dist/
 build/
 
 # Environment variables
@@ -10,31 +11,35 @@ build/
 .env.local
 .env.*.local
 
-# System Files
+# System files
 .DS_Store
 Thumbs.db
 
 # Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Framework/Tooling
+# Framework / tooling
 .tanstack/
 .vercel/
-.next/
 
-# IDE
+# Editors
 .vscode/
 .idea/
 
-# Test/Scratch files
+# Scratch files
 test_*.ts
 test_*.js
 
-# Package manager lock files (optional, uncomment if desired)
-# package-lock.json
+# Service account key for Node-side scripts (scripts/firebase-node.mjs).
+# Generate via Firebase Console > Project Settings > Service Accounts > Generate new private key.
+service-account.json
 
-# Local backups
+# Local backups and migration output (see scripts/backup.mjs, scripts/optimize-covers.mjs).
+# backup_images/ holds the pre-compression originals and is the rollback source
+# for the cover migration — keep it, just don't commit ~370 MB of it.
 backup.json
 backup_images/
+migration-report.json

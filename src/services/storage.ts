@@ -1,89 +1,76 @@
-import { storage } from '../utils/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '../lib/firebase'
+import { processCoverImage } from '../lib/image'
 
-export const uploadCoverImage = async (file: File): Promise<{ path: string; signedUrl: string } | null> => {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${Date.now()}.${fileExt}`
-    const storageRef = ref(storage, `covers/${fileName}`)
+const COVERS_PREFIX = 'covers'
 
-    try {
-        await uploadBytes(storageRef, file)
-        const downloadUrl = await getDownloadURL(storageRef)
-        return {
-            path: fileName,
-            signedUrl: downloadUrl
-        }
-    } catch (uploadError) {
-        console.error('Error uploading image:', uploadError)
-        throw uploadError
-    }
+export interface UploadedCover {
+  /** Storage path, stored on the document as `cover_path`. */
+  path: string
+  /** Full download URL, stored on the document as `cover_url`. */
+  url: string
+  originalBytes: number
+  uploadedBytes: number
 }
 
-export const getSignedUrl = async (path: string): Promise<string | null> => {
-    if (path.startsWith('http')) return path
-    
-    try {
-        const storageRef = ref(storage, `covers/${path}`)
-        const url = await getDownloadURL(storageRef)
-        return url
-    } catch (error) {
-        console.error('Error getting download URL:', error)
-        return null
-    }
+/**
+ * Compresses and uploads a cover, returning a directly-usable download URL.
+ *
+ * The URL is persisted on the document so nothing has to resolve it later. The
+ * old flow stored a bare filename and called `getDownloadURL()` for every image
+ * on every page render — 20 sequential round trips before the first cover could
+ * even start downloading.
+ */
+export async function uploadCoverImage(file: File): Promise<UploadedCover> {
+  const { blob, extension, originalBytes } = await processCoverImage(file)
+
+  const path = `${COVERS_PREFIX}/${Date.now()}-${randomSuffix()}.${extension}`
+  const storageRef = ref(storage, path)
+
+  await uploadBytes(storageRef, blob, {
+    contentType: blob.type,
+    // Covers are immutable once written — each upload gets a unique name — so
+    // they can be cached aggressively by the browser and any CDN in front.
+    cacheControl: 'public, max-age=31536000, immutable',
+  })
+
+  return {
+    path,
+    url: await getDownloadURL(storageRef),
+    originalBytes,
+    uploadedBytes: blob.size,
+  }
 }
 
-export const getSignedUrls = async (paths: string[]): Promise<Record<string, string>> => {
-    const result: Record<string, string> = {}
-    
-    await Promise.all(paths.map(async (path) => {
-        try {
-            const storageRef = ref(storage, `covers/${path}`)
-            const url = await getDownloadURL(storageRef)
-            result[path] = url
-        } catch (error) {
-            console.error(`Error getting download URL for ${path}:`, error)
-        }
-    }))
-    
-    return result
+/**
+ * Resolves a cover value that might still be a legacy bare storage path.
+ *
+ * `scripts/optimize-covers.mjs` rewrote every document to hold a full URL, so
+ * this should never do network work in practice. It exists so a stray or
+ * hand-edited row degrades gracefully instead of rendering a broken image.
+ *
+ * Do not call this from a render path — resolutions are memoised per session,
+ * but the first one still costs a round trip.
+ */
+const resolutionCache = new Map<string, Promise<string | null>>()
+
+export function resolveCoverUrl(coverUrl: string | null): Promise<string | null> {
+  if (!coverUrl) return Promise.resolve(null)
+  if (coverUrl.startsWith('http')) return Promise.resolve(coverUrl)
+
+  const cached = resolutionCache.get(coverUrl)
+  if (cached) return cached
+
+  const path = coverUrl.includes('/') ? coverUrl : `${COVERS_PREFIX}/${coverUrl}`
+  const pending = getDownloadURL(ref(storage, path)).catch((error) => {
+    console.error(`Could not resolve cover "${coverUrl}":`, error)
+    return null
+  })
+
+  resolutionCache.set(coverUrl, pending)
+  return pending
 }
 
-export const validateImageResponse = (file: File): Promise<{ valid: boolean; error?: string }> => {
-    return new Promise((resolve) => {
-        const img = new Image()
-        img.src = URL.createObjectURL(file)
-        img.onload = () => {
-            URL.revokeObjectURL(img.src)
-            const { width, height } = img
-
-            if (file.size > 20 * 1024 * 1024) {
-                 resolve({ valid: false, error: 'Image must be less than 20MB' })
-                 return
-            }
-
-            if (width > 4096 || height > 4096) {
-                resolve({ valid: false, error: 'Image resolution too high (max 4096px)' })
-                return
-            }
-
-            if (width < 300 || height < 450) {
-                 resolve({ valid: false, error: 'Image resolution too low (min 300x450px)' })
-                 return
-            }
-
-            const aspectRatio = width / height
-            const targetRatio = 2 / 3
-            const tolerance = 0.05 // Allow small deviation
-
-            if (Math.abs(aspectRatio - targetRatio) > tolerance) {
-                resolve({ valid: false, error: 'Image must have a 2:3 aspect ratio (e.g., 600x900)' })
-                return
-            }
-
-            resolve({ valid: true })
-        }
-        img.onerror = () => {
-            resolve({ valid: false, error: 'Invalid image file' })
-        }
-    })
+function randomSuffix(): string {
+  return Math.random().toString(36).slice(2, 8)
 }

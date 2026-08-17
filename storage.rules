@@ -1,9 +1,37 @@
 rules_version = '2';
 
+// Restricted to the owner's account — see firestore.rules for the rationale.
+//
+// Note on cover images: the app stores a full Storage download URL on each
+// document. Those URLs carry their own access token and are served independently
+// of these rules, so locking `read` down here does not stop covers from
+// displaying. These rules govern the SDK paths: uploading a new cover, and the
+// backup / migration scripts.
+//
+// Deploy with: firebase deploy --only storage
 service firebase.storage {
   match /b/{bucket}/o {
+
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'sunnyliu010@gmail.com';
+    }
+
+    match /covers/{coverId} {
+      allow read: if isOwner();
+      // Covers are images only, and capped well above the ~60 KB the client
+      // compresses to — enough headroom for the migration script's output.
+      allow write: if isOwner()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /backups/{allPaths=**} {
+      allow read, write: if isOwner();
+    }
+
     match /{allPaths=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

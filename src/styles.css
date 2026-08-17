@@ -1,16 +1,53 @@
+/* Self-hosted Inter. Replaces the render-blocking Google Fonts <link>, which
+   cost two extra DNS + TLS handshakes on the critical path. */
+@import '@fontsource-variable/inter';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  overscroll-behavior-y: none;
+@layer base {
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  /* Reserve the scrollbar so opening a modal doesn't shift the grid sideways. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  /* Honour the OS "reduce motion" setting everywhere, including Tailwind's
+     animate-* utilities and any transition we declare. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-700/30;
+    @apply border border-white/20 bg-white/70 backdrop-blur-md dark:border-gray-700/30 dark:bg-gray-900/70;
   }
+
   .glass-panel {
-    @apply bg-white/85 dark:bg-gray-900/85 backdrop-blur-xl border border-white/40 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)];
+    @apply border border-white/40 bg-white/85 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-xl dark:border-gray-700/50 dark:bg-gray-900/85 dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)];
+  }
+
+  /* One consistent keyboard-focus treatment. Previously most interactive
+     elements used `focus:outline-none` with no replacement, which made the app
+     effectively unusable by keyboard. */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-primary-500/70 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900;
+  }
+
+  .mask-gradient {
+    mask-image: linear-gradient(to right, transparent, black 8px, black calc(100% - 8px), transparent);
   }
 }

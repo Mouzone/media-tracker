@@ -8,12 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutBulkUploadRouteImport } from './routes/_layout/bulk-upload'
-import { Route as LayoutCategoryRouteImport } from './routes/_layout/$category'
+
+const LayoutBulkUploadLazyRouteImport = createFileRoute(
+  '/_layout/bulk-upload',
+)()
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -29,49 +33,37 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutBulkUploadRoute = LayoutBulkUploadRouteImport.update({
+const LayoutBulkUploadLazyRoute = LayoutBulkUploadLazyRouteImport.update({
   id: '/bulk-upload',
   path: '/bulk-upload',
   getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutCategoryRoute = LayoutCategoryRouteImport.update({
-  id: '/$category',
-  path: '/$category',
-  getParentRoute: () => LayoutRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_layout/bulk-upload.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/login': typeof LoginRoute
-  '/$category': typeof LayoutCategoryRoute
-  '/bulk-upload': typeof LayoutBulkUploadRoute
+  '/bulk-upload': typeof LayoutBulkUploadLazyRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
-  '/$category': typeof LayoutCategoryRoute
-  '/bulk-upload': typeof LayoutBulkUploadRoute
+  '/bulk-upload': typeof LayoutBulkUploadLazyRoute
   '/': typeof LayoutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_layout': typeof LayoutRouteWithChildren
   '/login': typeof LoginRoute
-  '/_layout/$category': typeof LayoutCategoryRoute
-  '/_layout/bulk-upload': typeof LayoutBulkUploadRoute
+  '/_layout/bulk-upload': typeof LayoutBulkUploadLazyRoute
   '/_layout/': typeof LayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/$category' | '/bulk-upload'
+  fullPaths: '/' | '/login' | '/bulk-upload'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/$category' | '/bulk-upload' | '/'
-  id:
-    | '__root__'
-    | '/_layout'
-    | '/login'
-    | '/_layout/$category'
-    | '/_layout/bulk-upload'
-    | '/_layout/'
+  to: '/login' | '/bulk-upload' | '/'
+  id: '__root__' | '/_layout' | '/login' | '/_layout/bulk-upload' | '/_layout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,28 +98,19 @@ declare module '@tanstack/react-router' {
       id: '/_layout/bulk-upload'
       path: '/bulk-upload'
       fullPath: '/bulk-upload'
-      preLoaderRoute: typeof LayoutBulkUploadRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/$category': {
-      id: '/_layout/$category'
-      path: '/$category'
-      fullPath: '/$category'
-      preLoaderRoute: typeof LayoutCategoryRouteImport
+      preLoaderRoute: typeof LayoutBulkUploadLazyRouteImport
       parentRoute: typeof LayoutRoute
     }
   }
 }
 
 interface LayoutRouteChildren {
-  LayoutCategoryRoute: typeof LayoutCategoryRoute
-  LayoutBulkUploadRoute: typeof LayoutBulkUploadRoute
+  LayoutBulkUploadLazyRoute: typeof LayoutBulkUploadLazyRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
-  LayoutCategoryRoute: LayoutCategoryRoute,
-  LayoutBulkUploadRoute: LayoutBulkUploadRoute,
+  LayoutBulkUploadLazyRoute: LayoutBulkUploadLazyRoute,
   LayoutIndexRoute: LayoutIndexRoute,
 }
 

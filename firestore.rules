@@ -1,9 +1,31 @@
 rules_version = '2';
 
+// Media Tracker is a single-user application. These rules previously granted
+// read and write to ANY authenticated Firebase user, which meant anyone who
+// managed to create an account in this project had full access to the library.
+// Access is now restricted to the owner's account.
+//
+// Deploy with: firebase deploy --only firestore:rules
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Firebase enforces one account per email address within a project, so the
+    // email claim uniquely identifies the owner. `email_verified` is deliberately
+    // NOT required: accounts created directly in the Firebase console are
+    // unverified by default, and requiring it would lock the owner out.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'sunnyliu010@gmail.com';
+    }
+
+    match /media_items/{itemId} {
+      allow read, write: if isOwner();
+    }
+
+    // Anything outside media_items is denied outright rather than left to a
+    // catch-all, so a future collection has to opt in deliberately.
     match /{document=**} {
-      allow read, write: if request.auth != null;
+      allow read, write: if false;
     }
   }
 }

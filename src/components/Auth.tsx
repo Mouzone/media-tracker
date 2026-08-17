@@ -1,98 +1,128 @@
-import React, { useState } from 'react';
-import { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } from 'firebase/auth';
-import { auth } from '../utils/firebase';
-import { useNavigate } from '@tanstack/react-router';
+import React, { useState } from 'react'
+import {
+  signInWithEmailAndPassword,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from 'firebase/auth'
+import { useNavigate } from '@tanstack/react-router'
+import { Loader2 } from 'lucide-react'
+import { auth } from '../lib/firebase'
+
+/** Firebase error codes mapped to something worth reading. */
+function describeAuthError(code: unknown): string {
+  switch (code) {
+    case 'auth/invalid-email':
+      return 'That email address doesn’t look right.'
+    case 'auth/user-disabled':
+      return 'This account has been disabled.'
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Try again in a few minutes.'
+    case 'auth/network-request-failed':
+      return 'Network error. Check your connection.'
+    default:
+      return 'Invalid email or password.'
+  }
+}
+
+const INPUT_CLASSES =
+  'focus-ring w-full rounded-lg border-b-2 border-gray-300 bg-transparent px-3 py-2 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-primary-500 dark:border-gray-700 dark:text-gray-100'
 
 export function Auth() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError('')
+    setIsLoading(true)
 
     try {
-      // Set persistence based on remember me checkbox
-      const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, persistence);
-      
-      await signInWithEmailAndPassword(auth, email, password);
-      // Navigation will be handled by the route or we can force it
-      navigate({ to: '/' });
-    } catch (err: any) {
-      console.error('Login error:', err);
-      setError('Invalid email or password.');
+      await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence)
+      await signInWithEmailAndPassword(auth, email, password)
+      navigate({ to: '/' })
+    } catch (err) {
+      console.error('Login failed:', err)
+      setError(describeAuthError((err as { code?: string })?.code))
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="w-full max-w-sm flex flex-col items-center">
-      <div className="flex flex-col items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">Login</h2>
+    <div className="flex w-full max-w-sm flex-col items-center">
+      <div className="mb-6 flex flex-col items-center">
+        <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+          Media Tracker
+        </h1>
+        <p className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          Sign in to your library
+        </p>
       </div>
 
       <form onSubmit={handleLogin} className="w-full space-y-4">
         <div>
+          <label htmlFor="email" className="sr-only">
+            Email address
+          </label>
           <input
             id="email"
             type="email"
+            autoComplete="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 text-sm rounded-lg bg-transparent border-b-2 border-gray-300 dark:border-gray-700 focus:outline-none focus:border-primary-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400"
+            onChange={(event) => setEmail(event.target.value)}
+            className={INPUT_CLASSES}
             placeholder="Email address"
             required
           />
         </div>
-        
+
         <div>
+          <label htmlFor="password" className="sr-only">
+            Password
+          </label>
           <input
             id="password"
             type="password"
+            autoComplete="current-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 text-sm rounded-lg bg-transparent border-b-2 border-gray-300 dark:border-gray-700 focus:outline-none focus:border-primary-500 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400"
+            onChange={(event) => setPassword(event.target.value)}
+            className={INPUT_CLASSES}
             placeholder="Password"
             required
           />
         </div>
 
         <div className="flex items-center pt-2">
-          <label className="flex items-center cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800"
+          <label className="group flex cursor-pointer items-center">
+            <input
+              type="checkbox"
+              className="focus-ring h-4 w-4 rounded border-gray-300 text-primary-600 dark:border-gray-600 dark:bg-gray-800"
               checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
+              onChange={(event) => setRememberMe(event.target.checked)}
             />
             <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">Remember me</span>
           </label>
         </div>
 
         {error && (
-          <div className="pt-2">
-            <p className="text-xs text-red-500 dark:text-red-400 text-center">{error}</p>
-          </div>
+          <p role="alert" className="pt-2 text-center text-xs text-red-500 dark:text-red-400">
+            {error}
+          </p>
         )}
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2 px-4 mt-4 bg-gray-900 hover:bg-gray-800 dark:bg-gray-100 dark:hover:bg-white dark:text-gray-900 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex justify-center items-center"
+          className="focus-ring mt-4 flex w-full items-center justify-center rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-white"
         >
-          {isLoading ? (
-            <div className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin"></div>
-          ) : (
-            'Sign In'
-          )}
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-label="Signing in" /> : 'Sign In'}
         </button>
       </form>
     </div>
-  );
+  )
 }

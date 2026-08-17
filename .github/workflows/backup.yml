@@ -2,30 +2,42 @@ name: Scheduled Backup
 
 on:
   schedule:
-    # Run at midnight on the 1st and 15th of every month
+    # Midnight on the 1st and 15th of every month.
     - cron: '0 0 1,15 * *'
-  # Also allow manual triggering from the GitHub Actions tab
   workflow_dispatch:
 
 jobs:
   backup:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          
+
       - name: Install dependencies
         run: npm ci
-        
-      - name: Run backup script
-        env:
-          FIREBASE_EMAIL: ${{ secrets.FIREBASE_EMAIL }}
-          FIREBASE_PASSWORD: ${{ secrets.FIREBASE_PASSWORD }}
-        run: node backup.js
+
+      # Write the service account key from a repository secret.
+      # Generate it in Firebase Console > Project Settings > Service Accounts >
+      # Generate new private key, then base64-encode it and add as the
+      # BASE64_FIREBASE_SERVICE_ACCOUNT repository secret.
+      - name: Write service account credentials
+        run: |
+          echo "${{ secrets.BASE64_FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > service-account.json
+
+      # --skip-images: ephemeral runner, no point mirroring 370 MB.
+      - name: Run backup
+        run: npm run backup -- --skip-images
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: media-tracker-backup-${{ github.run_id }}
+          path: backup.json
+          retention-days: 90
