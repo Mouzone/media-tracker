@@ -5,7 +5,6 @@ import {
   browserLocalPersistence,
   browserSessionPersistence,
 } from 'firebase/auth'
-import { useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import { auth } from '../lib/firebase'
 
@@ -34,7 +33,6 @@ export function Auth() {
   const [rememberMe, setRememberMe] = useState(true)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -44,7 +42,10 @@ export function Auth() {
     try {
       await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence)
       await signInWithEmailAndPassword(auth, email, password)
-      navigate({ to: '/' })
+      // No manual navigate() — onAuthStateChanged fires, the router context
+      // updates, and the login route's beforeLoad guard redirects to "/".
+      // Navigating manually here was why the first click did nothing: the guard
+      // still saw isAuthenticated: false and bounced back to /login.
     } catch (err) {
       console.error('Login failed:', err)
       setError(describeAuthError((err as { code?: string })?.code))

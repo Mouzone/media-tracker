@@ -43,3 +43,4 @@ service-account.json
 backup.json
 backup_images/
 migration-report.json
+.vercel/

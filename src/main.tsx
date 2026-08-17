@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from '@tanstack/react-router'
 import { router } from './router'
@@ -10,6 +10,17 @@ import './styles.css'
 
 function App() {
   const auth = useAuth()
+
+  // When the auth state changes (sign-in, sign-out, token refresh), re-evaluate
+  // the route guards. TanStack Router doesn't do this automatically when the
+  // context prop changes — it needs an explicit invalidate.
+  //
+  // This is what makes login work on the first click: onAuthStateChanged fires,
+  // the context updates, this effect invalidates the router, and the login
+  // route's beforeLoad guard sees isAuthenticated: true and redirects to "/".
+  useEffect(() => {
+    router.invalidate()
+  }, [auth.isAuthenticated])
 
   if (auth.isLoading) {
     return (
