@@ -3,6 +3,7 @@ import { Listbox, Transition, Combobox } from '@headlessui/react'
 import { Check, ChevronsUpDown, X } from 'lucide-react'
 import clsx from 'clsx'
 import { STATUS_LABELS, STATUS_VALUES } from '../types'
+import { suggestTags } from '../data/selectors'
 import type { LibraryFilter, SortOption, StatusFilter } from '../data/selectors'
 
 interface Option<T> {
@@ -25,8 +26,17 @@ const STATUS_OPTIONS: Option<StatusFilter>[] = [
 const FIELD_CLASSES =
   'focus-ring relative h-[42px] w-full cursor-pointer rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-4 pr-10 text-left font-semibold text-gray-900 shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:border-gray-600 dark:hover:bg-gray-700 sm:text-sm'
 
+/**
+ * These open **upward**. The filter bar lives in a panel pinned to the bottom of
+ * the viewport, so a downward dropdown renders past the bottom edge — and because
+ * the panel is `fixed`, there is nothing to scroll to reach it. Options below the
+ * fold were simply unreachable.
+ *
+ * The height is capped against the viewport as well as at 15rem so the list still
+ * fits (and scrolls) on short screens.
+ */
 const OPTIONS_CLASSES =
-  'absolute z-40 mt-1.5 max-h-60 w-full overflow-auto rounded-xl border border-gray-200 bg-white py-1 text-base shadow-lg focus:outline-none dark:border-gray-700 dark:bg-gray-800 sm:text-sm'
+  'absolute bottom-full z-40 mb-1.5 max-h-[min(15rem,45vh)] w-full overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white py-1 text-base shadow-lg focus:outline-none dark:border-gray-700 dark:bg-gray-800 sm:text-sm'
 
 const LABEL_CLASSES =
   'mb-1.5 block pl-1 text-[10px] font-bold uppercase tracking-widest text-gray-500 dark:text-gray-400'
@@ -118,9 +128,9 @@ interface FilterBarProps {
 export function FilterBar({ filter, onChange, availableTags, onReset, canReset }: FilterBarProps) {
   const [tagQuery, setTagQuery] = useState('')
 
-  const filteredTags = tagQuery
-    ? availableTags.filter((tag) => tag.toLowerCase().includes(tagQuery.toLowerCase()))
-    : availableTags
+  // Searches every tag in the library, ranked. Selected tags stay in the list so
+  // they can be toggled back off from here.
+  const filteredTags = suggestTags(availableTags, tagQuery)
 
   return (
     <div className="flex flex-col items-start gap-4 rounded-3xl border border-gray-100 bg-white p-4 shadow-sm transition-colors dark:border-gray-800 dark:bg-gray-900 md:flex-row md:items-end">
@@ -129,7 +139,7 @@ export function FilterBar({ filter, onChange, availableTags, onReset, canReset }
         value={filter.status}
         options={STATUS_OPTIONS}
         onChange={(status) => onChange({ status })}
-        className="z-30 w-full md:w-44"
+        className="z-10 w-full md:w-44"
       />
 
       <SelectField
@@ -140,7 +150,9 @@ export function FilterBar({ filter, onChange, availableTags, onReset, canReset }
         className="z-20 w-full md:w-44"
       />
 
-      <div className="z-10 min-w-[200px] flex-1">
+      {/* Stacking runs bottom-up to match the upward dropdowns: each field's list
+          opens over the fields above it. */}
+      <div className="z-30 min-w-[200px] flex-1">
         <Combobox
           value={filter.tags}
           onChange={(tags) => {

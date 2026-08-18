@@ -1,8 +1,9 @@
 import { Dialog, Transition, Combobox } from '@headlessui/react'
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { X, Plus, Calendar, ThumbsUp, ThumbsDown, Loader2, Edit2, Minus, Check } from 'lucide-react'
+import { X, Plus, Calendar, ThumbsUp, ThumbsDown, Loader2, Edit2, Minus } from 'lucide-react'
 import clsx from 'clsx'
 import { createItem, deleteItem, updateItem } from '../data/mutations'
+import { canonicalizeTag, suggestTags } from '../data/selectors'
 import { uploadCoverImage, resolveCoverUrl } from '../services/storage'
 import { CoverProcessingError } from '../lib/image'
 import { useToast } from './Toast'
@@ -115,9 +116,15 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
     }
   }, [isOpen, item])
 
-  const suggestedTags = existingTags
-    .filter((tag) => !form.tags.includes(tag) && tag.toLowerCase().includes(tagInput.toLowerCase()))
-    .slice(0, 5)
+  // Every tag in the library is searchable here, not just the first few matches.
+  // `existingTags` comes from the live library snapshot, so tags added elsewhere
+  // show up without a reload.
+  const suggestedTags = suggestTags(existingTags, tagInput, form.tags)
+  const trimmedTagInput = tagInput.trim()
+  const isKnownTag = [...existingTags, ...form.tags].some(
+    (tag) => tag.toLowerCase() === trimmedTagInput.toLowerCase(),
+  )
+  const canCreateTag = trimmedTagInput.length > 0 && !isKnownTag
 
   const handleCoverChange = async (file: File | undefined) => {
     if (!file || !isEditing) return
@@ -198,8 +205,11 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
   }
 
   const addTag = (tag: string) => {
-    const trimmed = tag.trim()
-    if (trimmed && !form.tags.includes(trimmed)) patch({ tags: [...form.tags, trimmed] })
+    // Reuse the library's existing casing so "Sci-Fi" doesn't become a second
+    // tag next to "sci-fi".
+    const next = canonicalizeTag(tag, existingTags)
+    const alreadyApplied = form.tags.some((t) => t.toLowerCase() === next.toLowerCase())
+    if (next && !alreadyApplied) patch({ tags: [...form.tags, next] })
     setTagInput('')
   }
 
@@ -522,36 +532,39 @@ export function MediaModal({ item, isOpen, onClose, existingTags = [] }: MediaMo
                                   leaveTo="opacity-0"
                                   afterLeave={() => setTagInput('')}
                                 >
-                                  <Combobox.Options className="absolute z-20 mt-2 max-h-48 w-full overflow-auto rounded-xl border border-gray-200 bg-white py-1 text-sm shadow-xl focus:outline-none dark:border-gray-700 dark:bg-gray-800">
-                                    {suggestedTags.length === 0 && tagInput ? (
+                                  <Combobox.Options className="absolute z-20 mt-2 max-h-56 w-full overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white py-1 text-sm shadow-xl focus:outline-none dark:border-gray-700 dark:bg-gray-800">
+                                    {/* Creating stays available even when the query
+                                        also matches existing tags. */}
+                                    {canCreateTag && (
                                       <Combobox.Option
-                                        value={tagInput.trim()}
+                                        value={trimmedTagInput}
                                         className="relative cursor-pointer select-none px-4 py-2 font-medium text-gray-700 transition-colors ui-active:bg-gray-50 ui-active:text-gray-900 dark:text-gray-300 dark:ui-active:bg-gray-700 dark:ui-active:text-gray-100"
                                       >
-                                        Create “{tagInput.trim()}”
+                                        Create “{trimmedTagInput}”
                                       </Combobox.Option>
-                                    ) : (
-                                      suggestedTags.map((tag) => (
-                                        <Combobox.Option
-                                          key={tag}
-                                          value={tag}
-                                          className={({ active }) =>
-                                            clsx(
-                                              'relative cursor-pointer select-none py-2 pl-9 pr-4 font-medium transition-colors',
-                                              active
-                                                ? 'bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-                                                : 'text-gray-700 dark:text-gray-300',
-                                            )
-                                          }
-                                        >
-                                          <span className="block truncate">{tag}</span>
-                                          {form.tags.includes(tag) && (
-                                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                              <Check className="h-4 w-4" aria-hidden="true" />
-                                            </span>
-                                          )}
-                                        </Combobox.Option>
-                                      ))
+                                    )}
+
+                                    {suggestedTags.map((tag) => (
+                                      <Combobox.Option
+                                        key={tag}
+                                        value={tag}
+                                        className={({ active }) =>
+                                          clsx(
+                                            'relative cursor-pointer select-none px-4 py-2 font-medium transition-colors',
+                                            active
+                                              ? 'bg-gray-50 text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+                                              : 'text-gray-700 dark:text-gray-300',
+                                          )
+                                        }
+                                      >
+                                        <span className="block truncate">{tag}</span>
+                                      </Combobox.Option>
+                                    ))}
+
+                                    {!canCreateTag && suggestedTags.length === 0 && (
+                                      <div className="select-none px-4 py-2 font-medium text-gray-500 dark:text-gray-400">
+                                        {trimmedTagInput ? 'Already added.' : 'No tags yet.'}
+                                      </div>
                                     )}
                                   </Combobox.Options>
                                 </Transition>

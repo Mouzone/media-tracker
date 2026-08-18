@@ -110,3 +110,40 @@ export function useFilteredMedia(items: MediaItem[], filter: LibraryFilter): Med
 export function useAllTags(items: MediaItem[]): string[] {
   return useMemo(() => collectTags(items), [items])
 }
+
+/**
+ * Case-insensitive search across every tag in the library, ranked so the
+ * closest matches come first: prefix matches, then substring matches, each
+ * alphabetised. An empty query returns everything.
+ *
+ * Results are deliberately **not** truncated — the dropdowns that render them
+ * scroll. Slicing to the first N here is what made older tags unreachable in
+ * the autocomplete once the library had more than a handful.
+ */
+export function suggestTags(allTags: string[], query: string, exclude: string[] = []): string[] {
+  const needle = query.trim().toLowerCase()
+  const applied = new Set(exclude.map((tag) => tag.toLowerCase()))
+  const candidates = allTags.filter((tag) => !applied.has(tag.toLowerCase()))
+
+  if (!needle) return candidates
+
+  return candidates
+    .filter((tag) => tag.toLowerCase().includes(needle))
+    .sort((a, b) => {
+      const aStarts = a.toLowerCase().startsWith(needle)
+      const bStarts = b.toLowerCase().startsWith(needle)
+      if (aStarts !== bStarts) return aStarts ? -1 : 1
+      return a.localeCompare(b)
+    })
+}
+
+/**
+ * Folds a typed tag onto an existing one that differs only by case or padding,
+ * so typing "Sci-Fi" reuses "sci-fi" instead of creating a second near-identical
+ * tag. Returns the trimmed input unchanged when the tag is genuinely new.
+ */
+export function canonicalizeTag(tag: string, allTags: string[]): string {
+  const trimmed = tag.trim()
+  if (!trimmed) return ''
+  return allTags.find((known) => known.toLowerCase() === trimmed.toLowerCase()) ?? trimmed
+}

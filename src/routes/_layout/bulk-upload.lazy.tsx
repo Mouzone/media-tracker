@@ -13,7 +13,7 @@ import {
 import clsx from 'clsx'
 import { bulkCreateItems } from '../../data/mutations'
 import { useMediaLibrary } from '../../data/MediaLibraryProvider'
-import { useAllTags } from '../../data/selectors'
+import { canonicalizeTag, suggestTags, useAllTags } from '../../data/selectors'
 import { uploadCoverImage } from '../../services/storage'
 import { CoverProcessingError } from '../../lib/image'
 import { useToast } from '../../components/Toast'
@@ -478,8 +478,11 @@ function BulkUpload() {
                         onKeyDown={(event) => {
                           if (event.key !== 'Enter') return
                           event.preventDefault()
-                          const value = tagInput.trim()
-                          if (value && !item.tags.includes(value)) {
+                          // Match an existing tag's casing rather than spawning a
+                          // near-duplicate.
+                          const value = canonicalizeTag(tagInput, allTags)
+                          const applied = item.tags.some((t) => t.toLowerCase() === value.toLowerCase())
+                          if (value && !applied) {
                             updateItem(item.id, { tags: [...item.tags, value] })
                           }
                           setTagInput('')
@@ -487,14 +490,8 @@ function BulkUpload() {
                       />
 
                       {focusedTagRowId === item.id && tagInput.trim() && (
-                        <div className="absolute left-0 top-full z-20 mt-2 max-h-48 w-48 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                          {allTags
-                            .filter(
-                              (tag) =>
-                                !item.tags.includes(tag) &&
-                                tag.toLowerCase().includes(tagInput.toLowerCase()),
-                            )
-                            .slice(0, 5)
+                        <div className="absolute left-0 top-full z-20 mt-2 max-h-48 w-48 overflow-y-auto overscroll-contain rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-gray-700 dark:bg-gray-800">
+                          {suggestTags(allTags, tagInput, item.tags)
                             .map((tag) => (
                               <button
                                 key={tag}
