@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "generate-icons": "node scripts/generate-icons.mjs",
     "backup": "node scripts/backup.mjs",
-    "optimize-covers": "node scripts/optimize-covers.mjs"
+    "optimize-covers": "node scripts/optimize-covers.mjs",
+    "normalize-tags": "node scripts/normalize-tags.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

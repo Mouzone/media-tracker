@@ -25,6 +25,7 @@ Service Accounts > Generate new private key):
 ```bash
 npm run backup              # export library + mirror covers
 npm run optimize-covers     # one-time cover compression (supports --dry-run, --limit N)
+npm run normalize-tags      # audit/repair tag spelling (dry run; --apply to write)
 npm run generate-icons      # regenerate PWA icons from public/icon.svg
 ```
 
@@ -60,6 +61,24 @@ fires `onSnapshot` immediately with the local write, so the UI updates
 optimistically with **no manual cache code**. Do not add React Query, optimistic
 update helpers, or `invalidateQueries` calls — they are not needed and will
 conflict with the listener.
+
+## Tags
+
+Free text, no controlled vocabulary. Kept consistent by convention rather than
+constraint: **Title Case, multi-word tags spaced** (`Comedy Special`, `Slice of
+Life`, `Talk Show`). As of the 2026-08 cleanup there are 59 distinct tags and no
+case/spacing duplicates.
+
+`suggestTags()` and `canonicalizeTag()` in `src/data/selectors.ts` back every tag
+input (modal, filter bar, bulk upload). `canonicalizeTag` folds a typed tag onto
+an existing one differing only by case, which is what keeps the convention from
+drifting. Autocomplete searches the **whole** tag list — do not re-add a
+`.slice(0, N)`, which is what previously made older tags unreachable.
+
+`scripts/normalize-tags.mjs` repairs drift after the fact. Its `RENAMES` table
+is deliberately explicit: semantic merges are taxonomy calls, not spelling
+fixes. Two pairs that look like duplicates and are not — `Football` (American)
+vs `Soccer`, and `Music` (subject) vs `Musical` (genre).
 
 ## Cover image contract
 
